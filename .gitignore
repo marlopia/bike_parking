@@ -1,2 +1,8 @@
 # Entorno virtual
 venvBikeParking
+
+# Cache
+__pycache__
+
+# VScode
+.vscode
