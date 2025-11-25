@@ -209,3 +209,129 @@ def test_es_campo_vacio(test_text, expected):
 def test_normalizar_texto(test_text, expected):
     """Comprueba que se devuelva True cuando el texto es vacío y False cuando no"""
     assert normalizar_texto(test_text) == expected
+
+
+# puede_entrar
+@pytest.mark.parametrize(
+    "test_serie,mock_data",
+    [
+        (
+            "BK001",
+            [
+                {
+                    "timestamp": "2025-03-01 08:15:22",
+                    "accion": "IN",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+                {
+                    "timestamp": "2025-03-01 08:17:22",
+                    "accion": "OUT",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+            ],
+        ),
+        ("BK001", []),
+    ],
+)
+def test_puede_entrar_correcto(test_serie, mock_data):
+    """
+    Comprueba que el validador vea que el ultimo estado de la bici
+    es OUT o que no ha sido introducida
+    """
+    mock_leer_csv(mock_data)
+    assert puede_entrar(test_serie) is True
+
+
+@pytest.mark.parametrize(
+    "test_serie,mock_data",
+    [
+        (
+            "BK001",
+            [
+                {
+                    "timestamp": "2025-03-01 08:15:22",
+                    "accion": "OUT",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+                {
+                    "timestamp": "2025-03-01 08:17:22",
+                    "accion": "IN",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+            ],
+        )
+    ],
+)
+def test_puede_entrar_incorrecto(test_serie, mock_data):
+    """
+    Comprueba que el validador vea que el ultimo estado de la bici
+    es OUT o que no ha sido introducida,
+    como es IN devuelve False
+    """
+    mock_leer_csv(mock_data)
+    assert puede_entrar(test_serie) is False
+
+
+# puede_salir
+@pytest.mark.parametrize(
+    "test_serie,mock_data",
+    [
+        (
+            "BK001",
+            [
+                {
+                    "timestamp": "2025-03-01 08:15:22",
+                    "accion": "OUT",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+                {
+                    "timestamp": "2025-03-01 08:17:22",
+                    "accion": "IN",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+            ],
+        )
+    ],
+)
+def test_puede_salir_correcto(test_serie, mock_data):
+    """Comprueba que el validador vea que el ultimo estado de la bici es IN"""
+    mock_leer_csv(mock_data)
+    assert puede_salir(test_serie) is True
+
+
+@pytest.mark.parametrize(
+    "test_serie,mock_data",
+    [
+        (
+            "BK001",
+            [
+                {
+                    "timestamp": "2025-03-01 08:15:22",
+                    "accion": "IN",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+                {
+                    "timestamp": "2025-03-01 08:17:22",
+                    "accion": "OUT",
+                    "num_serie": "BK001",
+                    "dni_usuario": "12345678A",
+                },
+            ],
+        ),
+        ("BK001", []),
+    ],
+)
+def test_puede_salir_incorrecto(test_serie, mock_data):
+    """
+    Comprueba que el validador vea que el ultimo estado de la bici es IN,
+    si ya esta fuera o nunca ha sido introducida devuelve False
+    """
+    mock_leer_csv(mock_data)
+    assert puede_salir(test_serie) is False
