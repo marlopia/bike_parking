@@ -11,6 +11,8 @@ from parking.data_utils.validators import (
     es_email_valido,
     es_serie_unica,
     normalizar_texto,
+    puede_entrar,
+    puede_salir,
 )
 from parking.data_utils.csv_utils import leer_csv_dic
 
@@ -235,7 +237,7 @@ def test_normalizar_texto(test_text, expected):
         ("BK001", []),
     ],
 )
-def test_puede_entrar_correcto(test_serie, mock_data):
+def test_puede_entrar_correcto(test_serie, mock_data, mock_leer_csv):
     """
     Comprueba que el validador vea que el ultimo estado de la bici
     es OUT o que no ha sido introducida
@@ -266,7 +268,7 @@ def test_puede_entrar_correcto(test_serie, mock_data):
         )
     ],
 )
-def test_puede_entrar_incorrecto(test_serie, mock_data):
+def test_puede_entrar_incorrecto(test_serie, mock_data, mock_leer_csv):
     """
     Comprueba que el validador vea que el ultimo estado de la bici
     es OUT o que no ha sido introducida,
@@ -299,7 +301,7 @@ def test_puede_entrar_incorrecto(test_serie, mock_data):
         )
     ],
 )
-def test_puede_salir_correcto(test_serie, mock_data):
+def test_puede_salir_correcto(test_serie, mock_data, mock_leer_csv):
     """Comprueba que el validador vea que el ultimo estado de la bici es IN"""
     mock_leer_csv(mock_data)
     assert puede_salir(test_serie) is True
@@ -328,7 +330,7 @@ def test_puede_salir_correcto(test_serie, mock_data):
         ("BK001", []),
     ],
 )
-def test_puede_salir_incorrecto(test_serie, mock_data):
+def test_puede_salir_incorrecto(test_serie, mock_data, mock_leer_csv):
     """
     Comprueba que el validador vea que el ultimo estado de la bici es IN,
     si ya esta fuera o nunca ha sido introducida devuelve False

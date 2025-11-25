@@ -3,7 +3,7 @@
 import re
 
 from .csv_utils import leer_csv_dic
-from ..config import PATRON_DNI, PATRON_EMAIL, USUARIOS_CSV, BICIS_CSV
+from ..config import PATRON_DNI, PATRON_EMAIL, USUARIOS_CSV, BICIS_CSV, REGISTROS_CSV
 
 
 def es_dni_valido(dni: str) -> bool:
@@ -110,3 +110,43 @@ def normalizar_texto(text: str) -> str:
         str: Texto sin espacios ni mayúsculas
     """
     return text.lower().replace(" ", "")
+
+
+def puede_entrar(num_serie: str) -> bool:
+    """
+    Devuelve si la bici puede ser guardada
+
+    Args:
+        num_serie (str): Número de serie de la bici
+
+    Returns:
+        bool: True si la bici nunca ha entrado o su último estado es OUT
+    """
+    filas = leer_csv_dic(REGISTROS_CSV)
+    estado = None
+    for fila in reversed(filas):  # Ordena de más reciente
+        if fila["num_serie"] == num_serie:
+            estado = fila["accion"]
+            break
+
+    return estado == "OUT" or estado == None
+
+
+def puede_salir(num_serie: str) -> bool:
+    """
+    Devuelve si la bici puede ser retirada
+
+    Args:
+        num_serie (str): Número de serie de la bici
+
+    Returns:
+        bool: True si el último estado de la bici es IN
+    """
+    filas = leer_csv_dic(REGISTROS_CSV)
+    estado = None
+    for fila in reversed(filas):  # Ordena de más reciente
+        if fila["num_serie"] == num_serie:
+            estado = fila["accion"]
+            break
+
+    return estado == "IN"
