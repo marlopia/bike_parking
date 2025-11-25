@@ -109,4 +109,4 @@ def normalizar_texto(text: str) -> str:
     Returns:
         str: Texto sin espacios ni mayúsculas
     """
-    return text.lower().strip()
+    return text.lower().replace(" ", "")

@@ -4,11 +4,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from parking.data_utils.validators import (
+    es_campo_vacio,
     es_dni_unico,
     es_dni_valido,
     es_email_unico,
     es_email_valido,
     es_serie_unica,
+    normalizar_texto,
 )
 from parking.data_utils.csv_utils import leer_csv_dic
 
@@ -179,3 +181,31 @@ def test_es_serie_unica_duplicado(test_serie, mock_leer_csv):
         ]
     )
     assert es_serie_unica(test_serie) is False
+
+
+# es_campo_vacio
+@pytest.mark.parametrize(
+    "test_text, expected",
+    [
+        ("", True),
+        ("foo", False),
+        ("123", False),
+    ],
+)
+def test_es_campo_vacio(test_text, expected):
+    """Comprueba que se devuelva True cuando el texto es vacío y False cuando no"""
+    assert es_campo_vacio(test_text) == expected
+
+
+# es_campo_vacio
+@pytest.mark.parametrize(
+    "test_text, expected",
+    [
+        ("a b c d", "abcd"),
+        ("ABCd", "abcd"),
+        ("A B c D", "abcd"),
+    ],
+)
+def test_normalizar_texto(test_text, expected):
+    """Comprueba que se devuelva True cuando el texto es vacío y False cuando no"""
+    assert normalizar_texto(test_text) == expected
