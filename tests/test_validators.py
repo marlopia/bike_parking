@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from parking.data_utils.validators import es_dni_valido
+from parking.data_utils.validators import es_dni_valido, es_email_valido
 
 
 # es_dni_valido

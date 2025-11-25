@@ -4,7 +4,7 @@ import re
 
 
 dni_pattern = r"^\d{8}[A-Za-z]$"
-email_pattern = r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"
+email_pattern = r"^[\w\.\-]+@[\w\.\-]+\.\w+$"
 
 
 def es_dni_valido(dni: str) -> bool:
