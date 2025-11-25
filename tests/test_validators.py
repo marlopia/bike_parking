@@ -11,6 +11,7 @@ from parking.data_utils.validators import es_dni_valido
     "test_input", ["27363397K", "64084713C", "07415485D", "10549082V", "43798002E"]
 )
 def test_dni_valido_correcto(test_input):
+    """Comprueba que el DNI tenga formato 12345678A (8 dígitos seguidos de una letra)"""
     assert es_dni_valido(test_input) == True
 
 
@@ -18,11 +19,13 @@ def test_dni_valido_correcto(test_input):
     "test_input", ["27363397k", "64084713c", "07415485d", "10549082v", "43798002e"]
 )
 def test_dni_valido_letra_minuscula(test_input):
+    """Comprueba que el validador de DNI acepte también letras minúsculas"""
     assert es_dni_valido(test_input) == True
 
 
 @pytest.mark.parametrize("test_input", ["7K", "613C", "5485D", "105082V", "4378002E"])
 def test_dni_valido_invalido_formato(test_input):
+    """Comprueba que el validador de DNI rechace formatos incorrectos"""
     assert es_dni_valido(test_input) == False
 
 
@@ -30,4 +33,5 @@ def test_dni_valido_invalido_formato(test_input):
     "test_input", ["27363397", "64084713", "07415485", "10549082", "43798002"]
 )
 def test_dni_valido_sin_letra(test_input):
+    """Comprueba que el validador de DNI rechace DNIs sin letra"""
     assert es_dni_valido(test_input) == False
