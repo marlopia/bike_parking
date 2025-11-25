@@ -62,7 +62,7 @@ def es_email_unico(email: str) -> bool:
     """
     filas = leer_csv_dic(USUARIOS_CSV)
     for fila in filas:
-        if fila["email"].lower() == email.lower():
+        if normalizar_texto(fila["email"]) == normalizar_texto(email):
             return False
 
     return True
@@ -84,3 +84,29 @@ def es_serie_unica(num_serie: str) -> bool:
             return False
 
     return True
+
+
+def es_campo_vacio(text: str) -> bool:
+    """
+    Valida que el texto introducido no esté vacío.
+
+    Args:
+        text (str): Texto introducido
+
+    Returns:
+        bool: True si el texto es vacío, False si no
+    """
+    return text == ""
+
+
+def normalizar_texto(text: str) -> str:
+    """
+    Devuelve la cadena de texto sin espacios ni mayúsculas
+
+    Args:
+        text (str): Texto a normalizar
+
+    Returns:
+        str: Texto sin espacios ni mayúsculas
+    """
+    return text.lower().strip()
