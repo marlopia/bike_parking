@@ -3,7 +3,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from parking.data_utils.validators import es_dni_valido, es_email_valido
+from parking.data_utils.validators import (
+    es_dni_unico,
+    es_dni_valido,
+    es_email_unico,
+    es_email_valido,
+    es_serie_unica,
+)
 from parking.data_utils.csv_utils import leer_csv_dic
 
 

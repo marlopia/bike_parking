@@ -2,9 +2,8 @@
 
 import re
 
-
-dni_pattern = r"^\d{8}[A-Za-z]$"
-email_pattern = r"^[\w\.\-]+@[\w\.\-]+\.\w+$"
+from .csv_utils import leer_csv_dic
+from ..config import PATRON_DNI, PATRON_EMAIL, USUARIOS_CSV, BICIS_CSV
 
 
 def es_dni_valido(dni: str) -> bool:
@@ -17,7 +16,7 @@ def es_dni_valido(dni: str) -> bool:
     Returns:
         bool: True si coincide el patrón, False si no
     """
-    return bool(re.match(dni_pattern, dni))
+    return bool(re.match(PATRON_DNI, dni))
 
 
 def es_email_valido(email: str) -> bool:
@@ -30,4 +29,58 @@ def es_email_valido(email: str) -> bool:
     Returns:
         bool: _description_
     """
-    return bool(re.match(email_pattern, email))
+    return bool(re.match(PATRON_EMAIL, email))
+
+
+def es_dni_unico(dni: str) -> bool:
+    """
+    Valida que un DNI no aparezca en el csv de usuarios
+
+    Args:
+        dni (str): DNI a validar
+
+    Returns:
+        bool: Si no existe el DNI devuelve True, si existe False
+    """
+    filas = leer_csv_dic(USUARIOS_CSV)
+    for fila in filas:
+        if fila["dni"] == dni:
+            return False
+
+    return True
+
+
+def es_email_unico(email: str) -> bool:
+    """
+    Valida que un email no aparezca en el csv de usuarios
+
+    Args:
+        email (str): email a validar
+
+    Returns:
+        bool: Si no existe el email devuelve True, si existe False
+    """
+    filas = leer_csv_dic(USUARIOS_CSV)
+    for fila in filas:
+        if fila["email"].lower() == email.lower():
+            return False
+
+    return True
+
+
+def es_serie_unica(num_serie: str) -> bool:
+    """
+    Valida que una serie no aparezca en el csv de bicis
+
+    Args:
+        num_serie (str): número de serie a validar
+
+    Returns:
+        bool: Si no existe el DNI devuelve True, si existe False
+    """
+    filas = leer_csv_dic(BICIS_CSV)
+    for fila in filas:
+        if fila["num_serie"] == num_serie:
+            return False
+
+    return True
