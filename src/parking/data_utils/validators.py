@@ -24,10 +24,10 @@ def es_email_valido(email: str) -> bool:
     Valida que un email conste de texto seguido de arroba y un dominio.
 
     Args:
-        email (str): _description_
+        email (str): Email a evaluar
 
     Returns:
-        bool: _description_
+        bool: True si coincide el patrón, False si no
     """
     return bool(re.match(PATRON_EMAIL, email))
 
