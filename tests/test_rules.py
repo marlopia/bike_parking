@@ -5,7 +5,14 @@ from datetime import datetime
 from unittest.mock import patch
 
 from parking.config import TIMESTAMP_FMT
-from parking.rules import guardar_usuario, guardar_bici, registrar
+from parking.rules import (
+    borrar_bici,
+    borrar_usuario,
+    guardar_usuario,
+    guardar_bici,
+    listar_bicis_usuario,
+    registrar,
+)
 
 
 # guardar_usuario
@@ -204,3 +211,132 @@ def test_registrar_invalido():
         pytest.raises(NotImplementedError),
     ):
         registrar("ALGO", "12345678A", "B123")
+
+
+# listar_bicis_usuario
+
+
+@pytest.mark.parametrize(
+    "dni, fake_data, expected",
+    [
+        (
+            "12345678A",
+            [
+                {"dni_usuario": "12345678A", "num_serie": "B123"},
+                {"dni_usuario": "12345678A", "num_serie": "B456"},
+                {"dni_usuario": "98765432Z", "num_serie": "B789"},
+            ],
+            ["B123", "B456"],
+        ),
+        (
+            "98765432Z",
+            [
+                {"dni_usuario": "12345678A", "num_serie": "B123"},
+                {"dni_usuario": "12345678A", "num_serie": "B456"},
+                {"dni_usuario": "98765432Z", "num_serie": "B789"},
+            ],
+            ["B789"],
+        ),
+        (
+            "00000000X",
+            [
+                {"dni_usuario": "12345678A", "num_serie": "B123"},
+                {"dni_usuario": "12345678A", "num_serie": "B456"},
+            ],
+            [],
+        ),
+    ],
+)
+def test_listar_bicis_usuario_param(monkeypatch, dni, fake_data, expected):
+    """Comprueba que se devuelvan los números de series de las biciclestas del usuario introducido"""
+    monkeypatch.setattr("parking.rules.leer_csv_dic", lambda path: fake_data)
+    assert listar_bicis_usuario(dni) == expected
+
+
+# borrar_bici
+
+
+def test_borrar_bici_no_existe(capfd):
+    """Comprueba que se lanza el mensaje de error cuando no existe la bici a borrar"""
+    with (
+        patch("parking.rules.es_serie_unica", return_value=True),
+        patch("parking.rules.borrar_filas"),
+    ):
+        assert borrar_bici("B123") is False
+        assert (
+            "ERROR: no existe la bicicleta con ese número de serie"
+            in capfd.readouterr().out
+        )
+
+
+def test_borrar_bici_ok(capfd):
+    """Comprueba que se borra la bici con exito y se lanza el mensaje de confirmación"""
+    with (
+        patch("parking.rules.es_serie_unica", return_value=False),
+        patch("parking.rules.borrar_filas"),
+    ):
+        assert borrar_bici("B123") is True
+        assert "OK: bicicleta borrada" in capfd.readouterr().out
+
+
+def test_borrar_bici_error_csv(capfd):
+    """Comprueba que se gestiona un error inexperado con un mensaje"""
+    with (
+        patch("parking.rules.es_serie_unica", return_value=False),
+        patch("parking.rules.borrar_filas", side_effect=Exception("fail")),
+    ):
+        assert borrar_bici("B123") is False
+        assert (
+            "ERROR: ha habido un error inexperado al borrar del CSV"
+            in capfd.readouterr().out
+        )
+
+
+def test_borrar_usuario_no_existe(capfd):
+    """Comprueba que se muestra un mensaje de error cuando no existe el usuario"""
+    with (
+        patch("parking.rules.es_dni_unico", return_value=True),
+        patch("parking.rules.listar_bicis_usuario"),
+        patch("parking.rules.borrar_filas"),
+    ):
+        assert borrar_usuario("12345678A") is False
+        assert "ERROR: no existe ese DNI en el registro" in capfd.readouterr().out
+
+
+def test_borrar_usuario_con_bicis(capfd):
+    """Comprueba que se muestra un mensaje de error al borrar un usuario con bicis"""
+    with (
+        patch("parking.rules.es_dni_unico", return_value=False),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
+        patch("parking.rules.borrar_filas"),
+    ):
+        assert borrar_usuario("12345678A") is False
+        assert (
+            "ERROR: el usuario tiene bicicletas registradas, no se puede borrar"
+            in capfd.readouterr().out
+        )
+
+
+def test_borrar_usuario_ok(capfd):
+    """Comprueba que se borra un usuario y se muestra un mensaje de confirmación"""
+    with (
+        patch("parking.rules.es_dni_unico", return_value=False),
+        patch("parking.rules.listar_bicis_usuario", return_value=[]),
+        patch("parking.rules.borrar_filas"),
+    ):
+        assert borrar_usuario("12345678A") is True
+        assert "OK: usuario borrado" in capfd.readouterr().out
+
+
+def test_borrar_usuario_error_csv(capfd):
+    """Comprueba que se gestiona un error inesperado con un mensaje"""
+    with (
+        patch("parking.rules.es_dni_unico", return_value=False),
+        patch("parking.rules.listar_bicis_usuario", return_value=[]),
+        patch("parking.rules.borrar_filas", side_effect=Exception("fail")),
+    ):
+        assert borrar_usuario("12345678A") is False
+        assert (
+            "ERROR: ha habido un error inexperado al borrar del CSV"
+            in capfd.readouterr().out
+        )
