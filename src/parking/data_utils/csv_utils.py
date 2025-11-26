@@ -91,3 +91,27 @@ def escribir_csv_dic(path: str, filas: list[dict[str, str]]) -> None:
     with open(path, mode="a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=filas[0].keys())
         writer.writerows(filas)
+
+
+def borrar_filas(csv_path: str, columna: str, valor: str) -> None:
+    """
+    Reescribe el fichero csv por completo omitiendo las filas que tengan una columna con valor coincidente
+
+    Args:
+        csv_path (str): Ruta al archivo csv
+        columna (str): Nombre de la columna a buscar
+        valor (str): Valor de la columna objetivo de las filas a borrar
+    """
+    filas_keep = []
+
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row[columna] != valor:
+                filas_keep.append(row)
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        fieldnames = reader.fieldnames or []
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(filas_keep)

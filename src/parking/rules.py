@@ -1,7 +1,7 @@
 """Archivo de la lógica de negocio del programa"""
 
 from datetime import datetime
-from .data_utils.csv_utils import escribir_csv_dic
+from .data_utils.csv_utils import borrar_filas, escribir_csv_dic, leer_csv_dic
 from .data_utils.validators import (
     es_campo_vacio,
     es_dni_unico,
@@ -179,3 +179,70 @@ def registrar(accion: str, dni: str, num_serie: str) -> bool:
         return True
     else:
         raise NotImplementedError("Accion debe ser IN o OUT")
+
+
+def listar_bicis_usuario(dni: str) -> list[str]:
+    """
+    Dado un DNI, devuelve todas las bicicletas del usuario
+
+    Args:
+        dni (str): DNI del usuario, no se verifica nada
+
+    Returns:
+        list[str]: Listado de números de serie de bicicletas
+    """
+    bicis = []
+    for fila in leer_csv_dic(BICIS_CSV):
+        if fila["dni_usuario"] == dni:
+            bicis.append(fila["num_serie"])
+
+    return bicis
+
+
+def borrar_bici(num_serie: str) -> bool:
+    """
+    Borra la bicicleta dado su número de serie
+
+    Args:
+        num_serie (str): Número de serie de la bicicleta
+
+    Returns:
+        bool: True si completa la operación
+    """
+    if es_serie_unica(num_serie):
+        print("ERROR: no existe la bicicleta con ese número de serie")
+        return False
+    else:
+        try:
+            borrar_filas(BICIS_CSV, "num_serie", num_serie)
+            print("OK: bicicleta borrada")
+            return True
+        except:
+            print("ERROR: ha habido un error inexperado al borrar del CSV")
+            return False
+
+
+def borrar_usuario(dni: str) -> bool:
+    """
+    Borra un usuario dado su DNI, siempre y cuando no tenga bicicletas registradas
+
+    Args:
+        dni (str): DNI del usuario
+
+    Returns:
+        bool: True si completa la operación
+    """
+    if es_dni_unico(dni):
+        print("ERROR: no existe ese DNI en el registro")
+        return False
+    elif len(listar_bicis_usuario(dni)) > 0:
+        print("ERROR: el usuario tiene bicicletas registradas, no se puede borrar")
+        return False
+    else:
+        try:
+            borrar_filas(USUARIOS_CSV, "dni", dni)
+            print("OK: usuario borrado")
+            return True
+        except:
+            print("ERROR: ha habido un error inexperado al borrar del CSV")
+            return False

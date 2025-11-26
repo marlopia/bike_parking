@@ -1,7 +1,14 @@
+import io
+from textwrap import dedent
 import pytest
 
 from parking.config import CABECERA_USUARIOS, CABECERA_BICIS, CABECERA_REGISTROS
-from parking.data_utils.csv_utils import asegurar_csvs, escribir_csv_dic, leer_csv_dic
+from parking.data_utils.csv_utils import (
+    asegurar_csvs,
+    borrar_filas,
+    escribir_csv_dic,
+    leer_csv_dic,
+)
 
 
 def test_asegurar_csvs_no_existen(tmp_path, monkeypatch):
@@ -101,3 +108,72 @@ def test_escribir_csv_dic(tmp_path, filas, expected):
     else:
         # Archivo no debería existir ni tener contenido
         assert not test_csv.exists() or test_csv.read_text(encoding="utf-8") == ""
+
+
+def test_leer_csv_dic(monkeypatch):
+    """Comprueba que la utilidad lea filas correctamente"""
+    fake_csv = dedent(
+        """\
+        dni,nombre,email
+        12345678A,Ana,ana@mail.com
+        98765432Z,Paco,paco@mail.com
+    """
+    )
+
+    def fake_open(*args, **kwargs):
+        return io.StringIO(fake_csv)
+
+    monkeypatch.setattr("builtins.open", fake_open)
+
+    res = leer_csv_dic("fake.csv")
+
+    assert res == [
+        {"dni": "12345678A", "nombre": "Ana", "email": "ana@mail.com"},
+        {"dni": "98765432Z", "nombre": "Paco", "email": "paco@mail.com"},
+    ]
+
+
+def test_borrar_filas(monkeypatch):
+    """Comprueba que la utilidad borre filas correctamente"""
+    fake_csv = dedent(
+        """\
+        dni,nombre,email
+        12345678A,Ana,ana@mail.com
+        98765432Z,Paco,paco@mail.com
+        45678901X,Maria,maria@mail.com
+    """
+    )
+    fake_file = io.StringIO(fake_csv)
+    written_content = io.StringIO()
+
+    class FakeFile:
+        def __init__(self, io_obj):
+            self.io_obj = io_obj
+
+        def __enter__(self):
+            self.io_obj.seek(0)
+            return self.io_obj
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
+
+    def fake_open(path, mode="r", newline=None, encoding=None):
+        if "r" in mode:
+            return FakeFile(fake_file)
+        else:
+            written_content.seek(0)
+            written_content.truncate(0)
+            return FakeFile(written_content)
+
+    monkeypatch.setattr("builtins.open", fake_open)
+
+    borrar_filas("fake.csv", "dni", "98765432Z")
+
+    written_content.seek(0)
+    reader = csv.DictReader(written_content)
+    rows = list(reader)
+
+    assert rows == [
+        {"dni": "12345678A", "nombre": "Ana", "email": "ana@mail.com"},
+        {"dni": "45678901X", "nombre": "Maria", "email": "maria@mail.com"},
+    ]
