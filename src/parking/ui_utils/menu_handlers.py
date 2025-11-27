@@ -1,9 +1,15 @@
 """Archivo de funciones de interacciones en el menú de la aplicación"""
 
-from ..rules import guardar_usuario, guardar_bici, registrar
+from ..rules import (
+    borrar_bici,
+    borrar_usuario,
+    guardar_usuario,
+    guardar_bici,
+    registrar,
+)
 
 
-def _preguntar(texto: str) -> bool:
+def preguntar_bool(texto: str) -> bool:
     """
     Método auxiliar de preguntas si o no.
     Itera hasta obtener una respuesta válida.
@@ -23,6 +29,20 @@ def _preguntar(texto: str) -> bool:
         return False
 
 
+def preguntar_dato(texto: str) -> str:
+    """
+    Método auxiliar de preguntas sobre un dato.
+    Recorta espacios delante y detrás del dato con .strip()
+
+    Args:
+        texto (str): Texto a sacar por pantalla para preguntar
+
+    Returns:
+        str: Cadena de texto introducida por el usuario
+    """
+    return input(texto).strip()
+
+
 def menu_anadir_usuario() -> bool:
     """
     Pide al usuario dni, nombre y email para registrarse.
@@ -31,16 +51,34 @@ def menu_anadir_usuario() -> bool:
     Returns:
         bool: True si se completa la operación
     """
-    dni = input("Introduce tu DNI con letra: ").strip()
-    nombre = input("Introduce tu nombre: ").strip()
-    email = input("Introduce tu email: ").strip()
+    dni = preguntar_dato("Introduce tu DNI con letra: ")
+    nombre = preguntar_dato("Introduce tu nombre: ")
+    email = preguntar_dato("Introduce tu email: ")
 
     while not guardar_usuario(dni, nombre, email):
-        if not _preguntar("Intentarlo de nuevo? (S/N): "):
+        if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
-        dni = input("Introduce tu DNI con letra: ").strip()
-        nombre = input("Introduce tu nombre: ").strip()
-        email = input("Introduce tu email: ").strip()
+        dni = preguntar_dato("Introduce tu DNI con letra: ")
+        nombre = preguntar_dato("Introduce tu nombre: ")
+        email = preguntar_dato("Introduce tu email: ")
+
+    return True
+
+
+def menu_borrar_usuario() -> bool:
+    """
+    Pide al usuario dni para borrar.
+    Se repite en bucle si el usuario acepta continuar
+
+    Returns:
+        bool: True si se completa la operación
+    """
+    dni = preguntar_dato("Introduce tu DNI con letra: ")
+
+    while not borrar_usuario(dni):
+        if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
+            return False
+        dni = preguntar_dato("Introduce tu DNI con letra: ")
 
     return True
 
@@ -53,18 +91,36 @@ def menu_anadir_bici() -> bool:
     Returns:
         bool: True si se completa la operación
     """
-    num_serie = input("Introduce el número de serie de tu bicicleta: ").strip()
-    dni = input("Introduce tu DNI con letra: ").strip()
-    marca = input("Introduce la marca de tu bicicleta: ").strip()
-    modelo = input("Introduce el modelo de tu bicicleta: ").strip()
+    num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+    dni = preguntar_dato("Introduce tu DNI con letra: ")
+    marca = preguntar_dato("Introduce la marca de tu bicicleta: ")
+    modelo = preguntar_dato("Introduce el modelo de tu bicicleta: ")
 
     while not guardar_bici(num_serie, dni, marca, modelo):
-        if not _preguntar("Intentarlo de nuevo? (S/N): "):
+        if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
-        num_serie = input("Introduce el número de serie de tu bicicleta: ").strip()
-        dni = input("Introduce tu DNI con letra: ").strip()
-        marca = input("Introduce la marca de tu bicicleta: ").strip()
-        modelo = input("Introduce el modelo de tu bicicleta: ").strip()
+        num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+        dni = preguntar_dato("Introduce tu DNI con letra: ")
+        marca = preguntar_dato("Introduce la marca de tu bicicleta: ")
+        modelo = preguntar_dato("Introduce el modelo de tu bicicleta: ")
+
+    return True
+
+
+def menu_borrar_bici() -> bool:
+    """
+    Pide al usuario número de serie para borrar una bicicleta.
+    Se repite en bucle si el usuario acepta continuar
+
+    Returns:
+        bool: True si se completa la operación
+    """
+    num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+
+    while not borrar_bici(num_serie):
+        if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
+            return False
+        num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
 
     return True
 
@@ -77,14 +133,14 @@ def registro_entrada() -> bool:
     Returns:
         bool: True si se completa la operación
     """
-    dni = input("Introduce tu DNI con letra: ").strip()
-    num_serie = input("Introduce el número de serie de tu bicicleta: ").strip()
+    dni = preguntar_dato("Introduce tu DNI con letra: ")
+    num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
 
     while not registrar("IN", dni, num_serie):
-        if not _preguntar("Intentarlo de nuevo? (S/N): "):
+        if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
-        dni = input("Introduce tu DNI con letra: ").strip()
-        num_serie = input("Introduce el número de serie de tu bicicleta: ").strip()
+        dni = preguntar_dato("Introduce tu DNI con letra: ")
+        num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
 
     return True
 
@@ -97,13 +153,13 @@ def registro_salida() -> bool:
     Returns:
         bool: True si se completa la operación
     """
-    dni = input("Introduce tu DNI con letra: ").strip()
-    num_serie = input("Introduce el número de serie de tu bicicleta: ").strip()
+    dni = preguntar_dato("Introduce tu DNI con letra: ")
+    num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
 
     while not registrar("OUT", dni, num_serie):
-        if not _preguntar("Intentarlo de nuevo? (S/N): "):
+        if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
-        dni = input("Introduce tu DNI con letra: ").strip()
-        num_serie = input("Introduce el número de serie de tu bicicleta: ").strip()
+        dni = preguntar_dato("Introduce tu DNI con letra: ")
+        num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
 
     return True
