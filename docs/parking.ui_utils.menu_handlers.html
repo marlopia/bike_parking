@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module parking.ui_utils.menu_handlers</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="parking.html" class="white">parking</a>.<a href="parking.ui_utils.html" class="white">ui_utils</a>.menu_handlers</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdalp%5Cbike_parking%5Csrc%5Cparking%5Cui_utils%5Cmenu_handlers.py">c:\users\dalp\bike_parking\src\parking\ui_utils\menu_handlers.py</a></td></tr></table>
+    <p><span class="code">Archivo&nbsp;de&nbsp;funciones&nbsp;de&nbsp;interacciones&nbsp;en&nbsp;el&nbsp;menú&nbsp;de&nbsp;la&nbsp;aplicación</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-menu_anadir_bici"><strong>menu_anadir_bici</strong></a>() -&gt; bool</dt><dd><span class="code">Pide&nbsp;al&nbsp;usuario&nbsp;número&nbsp;de&nbsp;serie,&nbsp;su&nbsp;DNI,&nbsp;marca&nbsp;y&nbsp;modelo&nbsp;para&nbsp;registrar&nbsp;su&nbsp;bicicleta.<br>
+Se&nbsp;repite&nbsp;en&nbsp;bucle&nbsp;si&nbsp;el&nbsp;usuario&nbsp;acepta&nbsp;continuar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-menu_anadir_usuario"><strong>menu_anadir_usuario</strong></a>() -&gt; bool</dt><dd><span class="code">Pide&nbsp;al&nbsp;usuario&nbsp;dni,&nbsp;nombre&nbsp;y&nbsp;email&nbsp;para&nbsp;registrarse.<br>
+Se&nbsp;repite&nbsp;en&nbsp;bucle&nbsp;si&nbsp;el&nbsp;usuario&nbsp;acepta&nbsp;continuar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-menu_borrar_bici"><strong>menu_borrar_bici</strong></a>() -&gt; bool</dt><dd><span class="code">Pide&nbsp;al&nbsp;usuario&nbsp;número&nbsp;de&nbsp;serie&nbsp;para&nbsp;borrar&nbsp;una&nbsp;bicicleta.<br>
+Se&nbsp;repite&nbsp;en&nbsp;bucle&nbsp;si&nbsp;el&nbsp;usuario&nbsp;acepta&nbsp;continuar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-menu_borrar_usuario"><strong>menu_borrar_usuario</strong></a>() -&gt; bool</dt><dd><span class="code">Pide&nbsp;al&nbsp;usuario&nbsp;dni&nbsp;para&nbsp;borrar.<br>
+Se&nbsp;repite&nbsp;en&nbsp;bucle&nbsp;si&nbsp;el&nbsp;usuario&nbsp;acepta&nbsp;continuar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-preguntar_bool"><strong>preguntar_bool</strong></a>(texto: str) -&gt; bool</dt><dd><span class="code">Método&nbsp;auxiliar&nbsp;de&nbsp;preguntas&nbsp;si&nbsp;o&nbsp;no.<br>
+Itera&nbsp;hasta&nbsp;obtener&nbsp;una&nbsp;respuesta&nbsp;válida.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;texto&nbsp;(str):&nbsp;Texto&nbsp;a&nbsp;sacar&nbsp;por&nbsp;pantalla&nbsp;para&nbsp;preguntar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;respuesta&nbsp;es&nbsp;S/s,&nbsp;False&nbsp;si&nbsp;es&nbsp;N/n</span></dd></dl>
+ <dl><dt><a name="-preguntar_dato"><strong>preguntar_dato</strong></a>(texto: str) -&gt; str</dt><dd><span class="code">Método&nbsp;auxiliar&nbsp;de&nbsp;preguntas&nbsp;sobre&nbsp;un&nbsp;dato.<br>
+Recorta&nbsp;espacios&nbsp;delante&nbsp;y&nbsp;detrás&nbsp;del&nbsp;dato&nbsp;con&nbsp;.strip()<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;texto&nbsp;(str):&nbsp;Texto&nbsp;a&nbsp;sacar&nbsp;por&nbsp;pantalla&nbsp;para&nbsp;preguntar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;Cadena&nbsp;de&nbsp;texto&nbsp;introducida&nbsp;por&nbsp;el&nbsp;usuario</span></dd></dl>
+ <dl><dt><a name="-registro_entrada"><strong>registro_entrada</strong></a>() -&gt; bool</dt><dd><span class="code">Pide&nbsp;al&nbsp;usuario&nbsp;su&nbsp;DNI&nbsp;y&nbsp;número&nbsp;de&nbsp;serie&nbsp;de&nbsp;bicicleta&nbsp;para&nbsp;insertar&nbsp;la&nbsp;bicicleta.<br>
+Se&nbsp;repite&nbsp;en&nbsp;bucle&nbsp;si&nbsp;el&nbsp;usuario&nbsp;acepta&nbsp;continuar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-registro_salida"><strong>registro_salida</strong></a>() -&gt; bool</dt><dd><span class="code">Pide&nbsp;al&nbsp;usuario&nbsp;su&nbsp;DNI&nbsp;y&nbsp;número&nbsp;de&nbsp;serie&nbsp;de&nbsp;bicicleta&nbsp;para&nbsp;sacar&nbsp;la&nbsp;bicicleta.<br>
+Se&nbsp;repite&nbsp;en&nbsp;bucle&nbsp;si&nbsp;el&nbsp;usuario&nbsp;acepta&nbsp;continuar<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+</td></tr></table>
+</body></html>

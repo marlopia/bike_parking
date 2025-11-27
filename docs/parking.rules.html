@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module parking.rules</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="parking.html" class="white">parking</a>.rules</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdalp%5Cbike_parking%5Csrc%5Cparking%5Crules.py">c:\users\dalp\bike_parking\src\parking\rules.py</a></td></tr></table>
+    <p><span class="code">Archivo&nbsp;de&nbsp;la&nbsp;lógica&nbsp;de&nbsp;negocio&nbsp;del&nbsp;programa</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-borrar_bici"><strong>borrar_bici</strong></a>(num_serie: str) -&gt; bool</dt><dd><span class="code">Borra&nbsp;la&nbsp;bicicleta&nbsp;dado&nbsp;su&nbsp;número&nbsp;de&nbsp;serie<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_serie&nbsp;(str):&nbsp;Número&nbsp;de&nbsp;serie&nbsp;de&nbsp;la&nbsp;bicicleta<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-borrar_usuario"><strong>borrar_usuario</strong></a>(dni: str) -&gt; bool</dt><dd><span class="code">Borra&nbsp;un&nbsp;usuario&nbsp;dado&nbsp;su&nbsp;DNI,&nbsp;siempre&nbsp;y&nbsp;cuando&nbsp;no&nbsp;tenga&nbsp;bicicletas&nbsp;registradas<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dni&nbsp;(str):&nbsp;DNI&nbsp;del&nbsp;usuario<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;completa&nbsp;la&nbsp;operación</span></dd></dl>
+ <dl><dt><a name="-guardar_bici"><strong>guardar_bici</strong></a>(num_serie: str, dni: str, marca: str, modelo: str) -&gt; bool</dt><dd><span class="code">Guarda&nbsp;una&nbsp;fila&nbsp;representativa&nbsp;de&nbsp;una&nbsp;bicicleta&nbsp;en&nbsp;el&nbsp;csv&nbsp;de&nbsp;bicicletas.<br>
+Escribe&nbsp;por&nbsp;pantalla&nbsp;un&nbsp;mensaje&nbsp;relativo&nbsp;a&nbsp;la&nbsp;ejecución<br>
+correcta&nbsp;o&nbsp;incorrecta&nbsp;del&nbsp;guardado.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_serie&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;del&nbsp;número&nbsp;de&nbsp;serie&nbsp;de&nbsp;la&nbsp;bicicleta.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;puede&nbsp;coincidir&nbsp;con&nbsp;un&nbsp;valor&nbsp;registrado&nbsp;previamente<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dni&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;del&nbsp;DNI&nbsp;del&nbsp;usuario.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Debe&nbsp;de&nbsp;haber&nbsp;sido&nbsp;registrado&nbsp;previamente&nbsp;en&nbsp;el&nbsp;fichero&nbsp;de&nbsp;usuarios<br>
+&nbsp;&nbsp;&nbsp;&nbsp;marca&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;de&nbsp;la&nbsp;marca&nbsp;de&nbsp;la&nbsp;bicicleta<br>
+&nbsp;&nbsp;&nbsp;&nbsp;modelo&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;del&nbsp;modelo&nbsp;de&nbsp;la&nbsp;bicicleta<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación&nbsp;sin&nbsp;fallos</span></dd></dl>
+ <dl><dt><a name="-guardar_usuario"><strong>guardar_usuario</strong></a>(dni: str, nombre: str, email: str) -&gt; bool</dt><dd><span class="code">Guarda&nbsp;una&nbsp;fila&nbsp;representativa&nbsp;de&nbsp;un&nbsp;usuario&nbsp;en&nbsp;el&nbsp;csv&nbsp;de&nbsp;usuarios.<br>
+Escribe&nbsp;por&nbsp;pantalla&nbsp;un&nbsp;mensaje&nbsp;relativo&nbsp;a&nbsp;la&nbsp;ejecución<br>
+correcta&nbsp;o&nbsp;incorrecta&nbsp;del&nbsp;guardado.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dni&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;de&nbsp;DNI&nbsp;con&nbsp;formato&nbsp;de&nbsp;8&nbsp;digitos&nbsp;y&nbsp;letra&nbsp;sin&nbsp;espacios&nbsp;o&nbsp;guiones.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;puede&nbsp;coincidir&nbsp;con&nbsp;un&nbsp;valor&nbsp;registrado&nbsp;previamente<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nombre&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;de&nbsp;nombre&nbsp;de&nbsp;usuario<br>
+&nbsp;&nbsp;&nbsp;&nbsp;email&nbsp;(str):&nbsp;Valor&nbsp;no&nbsp;vacío&nbsp;de&nbsp;email&nbsp;con&nbsp;formato&nbsp;texto@dominio.tld.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;puede&nbsp;coincidir&nbsp;con&nbsp;un&nbsp;valor&nbsp;registrado&nbsp;previamente<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación&nbsp;sin&nbsp;fallos</span></dd></dl>
+ <dl><dt><a name="-listar_bicis_usuario"><strong>listar_bicis_usuario</strong></a>(dni: str) -&gt; list[str]</dt><dd><span class="code">Dado&nbsp;un&nbsp;DNI,&nbsp;devuelve&nbsp;todas&nbsp;las&nbsp;bicicletas&nbsp;del&nbsp;usuario<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dni&nbsp;(str):&nbsp;DNI&nbsp;del&nbsp;usuario,&nbsp;no&nbsp;se&nbsp;verifica&nbsp;nada<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list[str]:&nbsp;Listado&nbsp;de&nbsp;números&nbsp;de&nbsp;serie&nbsp;de&nbsp;bicicletas</span></dd></dl>
+ <dl><dt><a name="-registrar"><strong>registrar</strong></a>(accion: str, dni: str, num_serie: str) -&gt; bool</dt><dd><span class="code">Comprueba&nbsp;si&nbsp;la&nbsp;bicicleta&nbsp;puede&nbsp;entrar&nbsp;o&nbsp;salir&nbsp;y&nbsp;registra&nbsp;su&nbsp;movimiento.<br>
+Escribe&nbsp;por&nbsp;pantalla&nbsp;un&nbsp;mensaje&nbsp;relativo&nbsp;a&nbsp;la&nbsp;ejecución<br>
+correcta&nbsp;o&nbsp;incorrecta&nbsp;del&nbsp;guardado.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;accion&nbsp;(str):&nbsp;IN&nbsp;para&nbsp;guardar&nbsp;la&nbsp;bicicleta,&nbsp;OUT&nbsp;para&nbsp;retirarla.&nbsp;No&nbsp;admite&nbsp;otros&nbsp;valores<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dni&nbsp;(str):&nbsp;DNI&nbsp;del&nbsp;usuario&nbsp;a&nbsp;registrar,&nbsp;esta&nbsp;función&nbsp;no&nbsp;lo&nbsp;verifica<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_serie&nbsp;(str):&nbsp;Número&nbsp;de&nbsp;serie&nbsp;de&nbsp;la&nbsp;bicicleta&nbsp;a&nbsp;registrar,&nbsp;esta&nbsp;función&nbsp;no&nbsp;lo&nbsp;verifica<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;NotImplementedError:&nbsp;Si&nbsp;no&nbsp;se&nbsp;acepta&nbsp;la&nbsp;orden&nbsp;del&nbsp;parámetro&nbsp;accion<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;completa&nbsp;la&nbsp;operación&nbsp;sin&nbsp;fallos</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>BICIS_CSV</strong> = 'data/bicis.csv'<br>
+<strong>REGISTROS_CSV</strong> = 'data/registros.csv'<br>
+<strong>TIMESTAMP_FMT</strong> = '%Y-%m-%d %H:%M:%S'<br>
+<strong>USUARIOS_CSV</strong> = 'data/usuarios.csv'</td></tr></table>
+</body></html>

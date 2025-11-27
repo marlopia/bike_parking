@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module parking.data_utils.csv_utils</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="parking.html" class="white">parking</a>.<a href="parking.data_utils.html" class="white">data_utils</a>.csv_utils</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdalp%5Cbike_parking%5Csrc%5Cparking%5Cdata_utils%5Ccsv_utils.py">c:\users\dalp\bike_parking\src\parking\data_utils\csv_utils.py</a></td></tr></table>
+    <p><span class="code">Utilidad&nbsp;para&nbsp;cargar&nbsp;y&nbsp;escribir&nbsp;información&nbsp;en&nbsp;csv</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="csv.html">csv</a><br>
+</td><td class="multicolumn"><a href="os.html">os</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-asegurar_csvs"><strong>asegurar_csvs</strong></a>() -&gt; None</dt><dd><span class="code">Comprueba&nbsp;que&nbsp;existan&nbsp;los&nbsp;archivos&nbsp;csv&nbsp;con&nbsp;sus&nbsp;cabeceras&nbsp;en&nbsp;las&nbsp;rutas&nbsp;necesarias,<br>
+si&nbsp;están&nbsp;malformados&nbsp;los&nbsp;borra&nbsp;y&nbsp;genera&nbsp;unos&nbsp;limpios,<br>
+si&nbsp;no&nbsp;existen&nbsp;crea&nbsp;los&nbsp;archivos&nbsp;con&nbsp;sus&nbsp;cabeceras.</span></dd></dl>
+ <dl><dt><a name="-borrar_filas"><strong>borrar_filas</strong></a>(csv_path: str, columna: str, valor: str) -&gt; None</dt><dd><span class="code">Reescribe&nbsp;el&nbsp;fichero&nbsp;csv&nbsp;por&nbsp;completo&nbsp;omitiendo&nbsp;las&nbsp;filas&nbsp;que&nbsp;tengan&nbsp;una&nbsp;columna&nbsp;con&nbsp;valor&nbsp;coincidente<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;csv_path&nbsp;(str):&nbsp;Ruta&nbsp;al&nbsp;archivo&nbsp;csv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columna&nbsp;(str):&nbsp;Nombre&nbsp;de&nbsp;la&nbsp;columna&nbsp;a&nbsp;buscar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;valor&nbsp;(str):&nbsp;Valor&nbsp;de&nbsp;la&nbsp;columna&nbsp;objetivo&nbsp;de&nbsp;las&nbsp;filas&nbsp;a&nbsp;borrar</span></dd></dl>
+ <dl><dt><a name="-escribir_csv_dic"><strong>escribir_csv_dic</strong></a>(path: str, filas: list[dict[str, str]]) -&gt; None</dt><dd><span class="code">Escribe&nbsp;filas&nbsp;en&nbsp;el&nbsp;csv&nbsp;de&nbsp;la&nbsp;ruta&nbsp;dada,<br>
+si&nbsp;no&nbsp;coinciden&nbsp;las&nbsp;claves&nbsp;se&nbsp;ignora&nbsp;y&nbsp;si&nbsp;las&nbsp;claves&nbsp;van&nbsp;vacías&nbsp;se&nbsp;rellena&nbsp;con&nbsp;''<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;path&nbsp;(str):&nbsp;Ruta&nbsp;al&nbsp;csv<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filas&nbsp;(list[dict[str,&nbsp;str]]):&nbsp;Lista&nbsp;de&nbsp;diccionarios&nbsp;(diccionario&nbsp;por&nbsp;fila)&nbsp;con&nbsp;clave&nbsp;valor&nbsp;estilo<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{cabecera:valor,cabecera:valor},{cabecera:valor,cabecera:valor}]</span></dd></dl>
+ <dl><dt><a name="-leer_csv_dic"><strong>leer_csv_dic</strong></a>(path: str) -&gt; list[dict[str, str]]</dt><dd><span class="code">Lee&nbsp;filas&nbsp;de&nbsp;un&nbsp;archivo&nbsp;csv&nbsp;dado&nbsp;por&nbsp;un&nbsp;path&nbsp;y&nbsp;devuelve&nbsp;una&nbsp;lista&nbsp;de&nbsp;diccionarios,<br>
+un&nbsp;diccionario&nbsp;por&nbsp;fila&nbsp;con&nbsp;sus&nbsp;claves&nbsp;de&nbsp;la&nbsp;cabecera&nbsp;y&nbsp;valor&nbsp;de&nbsp;la&nbsp;columna.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;path&nbsp;(str):&nbsp;Path&nbsp;al&nbsp;fichero&nbsp;.csv<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list[dict[str,&nbsp;str]]:&nbsp;Una&nbsp;lista&nbsp;con&nbsp;diccionarios&nbsp;por&nbsp;cada&nbsp;fila</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>BICIS_CSV</strong> = 'data/bicis.csv'<br>
+<strong>CABECERA_BICIS</strong> = 'num_serie,dni_usuario,marca,modelo'<br>
+<strong>CABECERA_REGISTROS</strong> = 'timestamp,accion,num_serie,dni_usuario'<br>
+<strong>CABECERA_USUARIOS</strong> = 'dni,nombre,email'<br>
+<strong>REGISTROS_CSV</strong> = 'data/registros.csv'<br>
+<strong>USUARIOS_CSV</strong> = 'data/usuarios.csv'</td></tr></table>
+</body></html>
