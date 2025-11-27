@@ -162,6 +162,7 @@ def test_registrar_in_ok(capfd):
     """Verifica que se guarda la entrada de la bicicleta correctamente y que muestre un mensaje de confirmación"""
     with (
         patch("parking.rules.puede_entrar", return_value=True),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
         patch("parking.rules.escribir_csv_dic"),
     ):
         assert registrar("IN", "12345678A", "B123") is True
@@ -171,10 +172,22 @@ def test_registrar_in_ok(capfd):
         )
 
 
+def test_registrar_in_bici_incorrecta(capfd):
+    """Verifica que no se guarda la entrada de la bicicleta que no es del usuario y que muestre un mensaje de error relevante"""
+    with (
+        patch("parking.rules.puede_entrar", return_value=True),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
+        patch("parking.rules.escribir_csv_dic"),
+    ):
+        assert registrar("IN", "12345678A", "BK001") is False
+        assert "ERROR: la bicicleta no pertenece al usuario" in capfd.readouterr().out
+
+
 def test_registrar_in_error(capfd):
     """Verifica que no se guarda la entrada de la bicicleta incorrecta y que muestre un mensaje de error relevante"""
     with (
         patch("parking.rules.puede_entrar", return_value=False),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
         patch("parking.rules.escribir_csv_dic"),
     ):
         assert registrar("IN", "12345678A", "B123") is False
@@ -185,6 +198,7 @@ def test_registrar_out_ok(capfd):
     """Verifica que se guarda la salida de la bicicleta correctamente y que muestre un mensaje de confirmación"""
     with (
         patch("parking.rules.puede_salir", return_value=True),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
         patch("parking.rules.escribir_csv_dic"),
     ):
         assert registrar("OUT", "12345678A", "B123") is True
@@ -198,15 +212,29 @@ def test_registrar_out_error(capfd):
     """Verifica que no se guarda la salida de la bicicleta incorrecta y que muestre un mensaje de error relevante"""
     with (
         patch("parking.rules.puede_salir", return_value=False),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
         patch("parking.rules.escribir_csv_dic"),
     ):
         assert registrar("OUT", "12345678A", "B123") is False
         assert "ERROR: la bicicleta no puede salir" in capfd.readouterr().out
 
 
+def test_registrar_out_bici_incorrecta(capfd):
+    """Verifica que no se guarda la salida de la bicicleta que no es del usuario y que muestre un mensaje de error relevante"""
+    with (
+        patch("parking.rules.puede_entrar", return_value=True),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
+        patch("parking.rules.escribir_csv_dic"),
+    ):
+        assert registrar("IN", "12345678A", "BK001") is False
+        assert "ERROR: la bicicleta no pertenece al usuario" in capfd.readouterr().out
+
+
 def test_registrar_invalido():
     """Verifica que salte el error NotImplementedError al intentar usar una accion no programada"""
     with (
+        patch("parking.rules.puede_entrar", return_value=True),
+        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
         patch("parking.rules.escribir_csv_dic"),
         pytest.raises(NotImplementedError),
     ):

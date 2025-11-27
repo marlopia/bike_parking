@@ -145,6 +145,9 @@ def registrar(accion: str, dni: str, num_serie: str) -> bool:
     """
 
     accion = accion.upper()
+    if not num_serie in listar_bicis_usuario(dni):
+        print("ERROR: la bicicleta no pertenece al usuario")
+        return False
     if accion == "IN":
         if not puede_entrar(num_serie):
             print("ERROR: la bicicleta no puede entrar")

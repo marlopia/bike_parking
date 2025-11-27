@@ -98,9 +98,9 @@ def manage_options(eleccion: int) -> bool:
     elif eleccion == 6:
         return registro_salida()
     else:  # eleccion == 7
-        return exit_app()
+        return False
 
 
-def exit_app():
-    # TODO manejar en app.py
-    raise NotImplementedError
+def pause() -> None:
+    """Espera a que el usuario pulse enter, ignora input"""
+    input("Presiona Enter para continuar...")
