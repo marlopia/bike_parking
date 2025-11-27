@@ -19,43 +19,26 @@ def asegurar_csvs() -> None:
     si están malformados los borra y genera unos limpios,
     si no existen crea los archivos con sus cabeceras.
     """
-    if not os.path.exists(USUARIOS_CSV):
-        with open(USUARIOS_CSV, "w") as f:
-            f.write(CABECERA_USUARIOS)
-    elif _extraer_cabecera(USUARIOS_CSV) != CABECERA_USUARIOS:
-        os.remove(USUARIOS_CSV)
-        with open(USUARIOS_CSV, "w") as f:
-            f.write(CABECERA_USUARIOS)
+    archivos = [
+        (USUARIOS_CSV, CABECERA_USUARIOS),
+        (BICIS_CSV, CABECERA_BICIS),
+        (REGISTROS_CSV, CABECERA_REGISTROS),
+    ]
 
-    if not os.path.exists(BICIS_CSV):
-        with open(BICIS_CSV, "w") as f:
-            f.write(CABECERA_BICIS)
-    elif _extraer_cabecera(BICIS_CSV) != CABECERA_BICIS:
-        os.remove(BICIS_CSV)
-        with open(BICIS_CSV, "w") as f:
-            f.write(CABECERA_BICIS)
+    for path, cabecera in archivos:
+        crear = False
+        if not os.path.exists(path):
+            crear = True
+        else:
+            with open(path, "r", encoding="utf-8") as f:
+                primera_linea = f.readline()
+            if primera_linea != cabecera + "\n":
+                os.remove(path)
+                crear = True
 
-    if not os.path.exists(REGISTROS_CSV):
-        with open(REGISTROS_CSV, "w") as f:
-            f.write(CABECERA_REGISTROS)
-    elif _extraer_cabecera(REGISTROS_CSV) != CABECERA_REGISTROS:
-        os.remove(REGISTROS_CSV)
-        with open(REGISTROS_CSV, "w") as f:
-            f.write(CABECERA_REGISTROS)
-
-
-def _extraer_cabecera(path: str) -> str:
-    """
-    Método auxiliar para extraer la cabecera en texto plano de un csv
-
-    Args:
-        path (str): Ruta al csv
-
-    Returns:
-        str: La cabecera del csv sin alterar
-    """
-    with open(path, "r", encoding="utf-8") as f:
-        return f.readline().strip()
+        if crear:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(cabecera + "\n")
 
 
 def leer_csv_dic(path: str) -> list[dict[str, str]]:
