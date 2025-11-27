@@ -14,3 +14,15 @@ REGISTROS_CSV = f"{DATA_DIR}/registros.csv"
 CABECERA_REGISTROS = "timestamp,accion,num_serie,dni_usuario"
 
 TIMESTAMP_FMT = "%Y-%m-%d %H:%M:%S"
+
+TITULO = "BIKE PARKING"
+
+OPCIONES = [
+    "REGISTRAR USUARIO",
+    "BORRAR USUARIO",
+    "REGISTRAR BICI",
+    "BORRAR BICI",
+    "GUARDAR BICI",
+    "SACAR BICI",
+    "SALIR",
+]
