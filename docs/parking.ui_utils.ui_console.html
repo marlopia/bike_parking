@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module parking.ui_utils.ui_console</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="parking.html" class="white">parking</a>.<a href="parking.ui_utils.html" class="white">ui_utils</a>.ui_console</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cdalp%5Cbike_parking%5Csrc%5Cparking%5Cui_utils%5Cui_console.py">c:\users\dalp\bike_parking\src\parking\ui_utils\ui_console.py</a></td></tr></table>
+    <p><span class="code">Archivo&nbsp;que&nbsp;gestiona&nbsp;los&nbsp;menús&nbsp;y&nbsp;visuales&nbsp;de&nbsp;la&nbsp;aplicación</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="os.html">os</a><br>
+</td><td class="multicolumn"><a href="platform.html">platform</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-clear_screen"><strong>clear_screen</strong></a>() -&gt; None</dt><dd><span class="code">Comprueba&nbsp;el&nbsp;sistema&nbsp;operativo&nbsp;del&nbsp;usuario&nbsp;y&nbsp;limpia&nbsp;la&nbsp;consola</span></dd></dl>
+ <dl><dt><a name="-manage_options"><strong>manage_options</strong></a>(eleccion: int) -&gt; bool</dt><dd><span class="code">Maneja&nbsp;la&nbsp;opción&nbsp;elegida&nbsp;por&nbsp;<a href="#-render_menu">render_menu</a>()<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;eleccion&nbsp;(int):&nbsp;Número&nbsp;de&nbsp;la&nbsp;elección<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;si&nbsp;se&nbsp;realiza&nbsp;la&nbsp;operación,&nbsp;False&nbsp;si&nbsp;no&nbsp;o</span></dd></dl>
+ <dl><dt><a name="-pause"><strong>pause</strong></a>() -&gt; None</dt><dd><span class="code">Espera&nbsp;a&nbsp;que&nbsp;el&nbsp;usuario&nbsp;pulse&nbsp;enter,&nbsp;ignora&nbsp;input</span></dd></dl>
+ <dl><dt><a name="-render_menu"><strong>render_menu</strong></a>(titulo: str, opciones: Optional[list[str]] = None) -&gt; int</dt><dd><span class="code">Imprime&nbsp;la&nbsp;cabecera&nbsp;de&nbsp;la&nbsp;aplicación&nbsp;con&nbsp;el&nbsp;titulo&nbsp;centrado&nbsp;y&nbsp;una&nbsp;lista&nbsp;de&nbsp;opciones.<br>
+Luego&nbsp;solicita&nbsp;al&nbsp;usuario&nbsp;un&nbsp;valor&nbsp;numérico&nbsp;que&nbsp;corresponda&nbsp;a&nbsp;las&nbsp;opciones&nbsp;y&nbsp;lo&nbsp;devuelve.<br>
+Por&nbsp;defecto&nbsp;imprime&nbsp;una&nbsp;cabecera&nbsp;de&nbsp;50&nbsp;caracteres&nbsp;de&nbsp;ancho,&nbsp;pero&nbsp;si&nbsp;el&nbsp;titulo&nbsp;es&nbsp;más<br>
+largo&nbsp;la&nbsp;extenderá.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;titulo&nbsp;(str):&nbsp;Titulo&nbsp;para&nbsp;la&nbsp;cabecera<br>
+&nbsp;&nbsp;&nbsp;&nbsp;opciones&nbsp;Optional[list[str]]:&nbsp;Lista&nbsp;de&nbsp;nombres&nbsp;de&nbsp;opciones,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;si&nbsp;no&nbsp;se&nbsp;usa&nbsp;esta&nbsp;función&nbsp;solo&nbsp;muestra&nbsp;el&nbsp;título&nbsp;y&nbsp;devolverá&nbsp;0<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;int:&nbsp;Posición&nbsp;de&nbsp;la&nbsp;lista&nbsp;con&nbsp;íncide&nbsp;1&nbsp;de&nbsp;la&nbsp;opción&nbsp;seleccionada,&nbsp;si&nbsp;se&nbsp;cancela&nbsp;devuelve&nbsp;0</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>OPCIONES</strong> = ['REGISTRAR USUARIO', 'BORRAR USUARIO', 'REGISTRAR BICI', 'BORRAR BICI', 'GUARDAR BICI', 'SACAR BICI', 'SALIR']<br>
+<strong>Optional</strong> = typing.Optional</td></tr></table>
+</body></html>
