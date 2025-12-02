@@ -4,6 +4,7 @@ venvBikeParking
 # Python
 __pycache__
 .coverage
+.env
 
 # VSCode
 .vscode
