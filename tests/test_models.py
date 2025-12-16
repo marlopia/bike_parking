@@ -1,3 +1,4 @@
+# TODO: portar tests
 """Archivo de pruebas de rules.py, no toca disco"""
 
 import pytest
@@ -5,86 +6,153 @@ from datetime import datetime
 from unittest.mock import patch
 
 from parking.config import TIMESTAMP_FMT
-from parking.rules import (
-    borrar_bici,
-    borrar_usuario,
-    guardar_usuario,
-    guardar_bici,
-    listar_bicis_usuario,
-    registrar,
-)
+
+from parking.models.usuario import Usuario
+from parking.models.bici import Bici
+from parking.models.registro import Registro
+
+# Usuario
 
 
-# guardar_usuario
-
-
+## Guardar
 def test_guardar_usuario_ok(capfd):
     """Verifica que se guarde el usuario válido y muestre el mensaje de confirmación"""
     with (
-        patch("parking.rules.es_dni_unico", return_value=True),
-        patch("parking.rules.es_email_unico", return_value=True),
-        patch("parking.rules.escribir_csv_dic"),
+        patch.object(Usuario, "es_valido", return_value=True),
+        patch.object(Usuario, "es_unico", return_value=True),
+        patch("parking.models.usuario.escribir_csv_dic"),
     ):
-        assert guardar_usuario("12345678A", "Ana", "ana@mail.com") is True
+        assert Usuario("12345678A", "Ana", "ana@mail.com").guardar() is True
         assert "OK: se ha registrado el usuario" in capfd.readouterr().out
 
 
 def test_guardar_usuario_dni_vacio(capfd):
     """Verifica que no guarde un DNI vacío y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_usuario("", "Ana", "ana@mail.com") is False
+    with patch("parking.models.usuario.escribir_csv_dic"):
+        assert Usuario("", "Ana", "ana@mail.com").guardar() is False
         assert "ERROR: Campo DNI vacío" in capfd.readouterr().out
 
 
 def test_guardar_usuario_nombre_vacio(capfd):
     """Verifica que no guarde un nombre vacío y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_usuario("12345678Z", "", "ana@mail.com") is False
+    with patch("parking.models.usuario.escribir_csv_dic"):
+        assert Usuario("12345678A", "", "ana@mail.com").guardar() is False
         assert "ERROR: Campo nombre vacío" in capfd.readouterr().out
 
 
 def test_guardar_usuario_email_vacio(capfd):
     """Verifica que no guarde un email vacío y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_usuario("12345678Z", "Ana", "") is False
+    with patch("parking.models.usuario.escribir_csv_dic"):
+        assert Usuario("12345678A", "Ana", "").guardar() is False
         assert "ERROR: Campo email vacío" in capfd.readouterr().out
 
 
 def test_guardar_usuario_dni_invalido(capfd):
     """Verifica que no guarde un DNI inválido y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_usuario("error", "Ana", "ana@mail.com") is False
+    with patch("parking.models.usuario.escribir_csv_dic"):
+        assert Usuario("error", "Ana", "ana@mail.com").guardar() is False
         assert "ERROR: Formato de DNI no reconocido" in capfd.readouterr().out
 
 
 def test_guardar_usuario_email_invalido(capfd):
     """Verifica que no guarde un email inválido y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_usuario("12345678Z", "Ana", "ana.com") is False
+    with patch("parking.models.usuario.escribir_csv_dic"):
+        assert Usuario("12345678A", "Ana", "error").guardar() is False
         assert "ERROR: Formato de email no reconocido" in capfd.readouterr().out
 
 
 def test_guardar_usuario_dni_duplicado(capfd):
     """Verifica que no guarde un DNI duplicado y muestre el mensaje de error relevante"""
     with (
-        patch("parking.rules.es_dni_unico", return_value=False),
-        patch("parking.rules.es_email_unico", return_value=True),
-        patch("parking.rules.escribir_csv_dic"),
+        patch.object(Usuario, "es_valido", return_value=True),
+        patch("parking.models.usuario.es_dni_unico", return_value=False),
+        patch("parking.models.usuario.escribir_csv_dic"),
     ):
-        assert guardar_usuario("12345678A", "Ana", "ana@mail.com") is False
+        assert Usuario("12345678A", "Ana", "ana@mail.com").guardar() is False
         assert "ERROR: El DNI 12345678A ya está registrado" in capfd.readouterr().out
 
 
 def test_guardar_usuario_email_duplicado(capfd):
     """Verifica que no guarde un email duplicado y muestre el mensaje de error relevante"""
     with (
-        patch("parking.rules.es_dni_unico", return_value=True),
-        patch("parking.rules.es_email_unico", return_value=False),
-        patch("parking.rules.escribir_csv_dic"),
+        patch.object(Usuario, "es_valido", return_value=True),
+        patch("parking.models.usuario.es_email_unico", return_value=False),
+        patch("parking.models.usuario.escribir_csv_dic"),
     ):
-        assert guardar_usuario("12345678A", "Ana", "ana@mail.com") is False
+        assert Usuario("12345678A", "Ana", "ana@mail.com").guardar() is False
         assert (
             "ERROR: El email ana@mail.com ya está registrado" in capfd.readouterr().out
+        )
+
+
+## usuario.bicis
+
+
+@pytest.mark.parametrize(
+    "dni, fake_data, expected",
+    [
+        (
+            "12345678A",
+            [
+                {"dni_usuario": "12345678A", "num_serie": "B123"},
+                {"dni_usuario": "12345678A", "num_serie": "B456"},
+                {"dni_usuario": "98765432Z", "num_serie": "B789"},
+            ],
+            ["B123", "B456"],
+        ),
+        (
+            "98765432Z",
+            [
+                {"dni_usuario": "12345678A", "num_serie": "B123"},
+                {"dni_usuario": "12345678A", "num_serie": "B456"},
+                {"dni_usuario": "98765432Z", "num_serie": "B789"},
+            ],
+            ["B789"],
+        ),
+        (
+            "00000000X",
+            [
+                {"dni_usuario": "12345678A", "num_serie": "B123"},
+                {"dni_usuario": "12345678A", "num_serie": "B456"},
+            ],
+            [],
+        ),
+    ],
+)
+def test_listar_bicis_usuario_param(monkeypatch, dni, fake_data, expected):
+    """Comprueba que se devuelvan los números de series de las biciclestas del usuario introducido"""
+    monkeypatch.setattr("parking.models.usuario.leer_csv_dic", lambda path: fake_data)
+    usuario = Usuario(dni)
+    assert usuario.bicis == expected
+
+
+## Borrar
+def test_borrar_usuario_ok(capfd):
+    """Comprueba que se borra un usuario y se muestra un mensaje de confirmación"""
+    usuario = Usuario("12345678A")
+    usuario.bicis = []
+
+    with (
+        patch("parking.models.usuario.es_dni_unico", return_value=False),
+        patch("parking.models.usuario.borrar_filas"),
+    ):
+        assert usuario.borrar() is True
+        assert "OK: usuario borrado" in capfd.readouterr().out
+
+
+def test_borrar_usuario_error_csv(capfd):
+    """Comprueba que se gestiona un error inesperado con un mensaje"""
+    usuario = Usuario("12345678A")
+    usuario.bicis = []
+
+    with (
+        patch("parking.models.usuario.es_dni_unico", return_value=False),
+        patch("parking.models.usuario.borrar_filas", side_effect=Exception("fail")),
+    ):
+        assert usuario.borrar() is False
+        assert (
+            "ERROR: ha habido un error inexperado al borrar del CSV"
+            in capfd.readouterr().out
         )
 
 
@@ -241,46 +309,6 @@ def test_registrar_invalido():
         registrar("ALGO", "12345678A", "B123")
 
 
-# listar_bicis_usuario
-
-
-@pytest.mark.parametrize(
-    "dni, fake_data, expected",
-    [
-        (
-            "12345678A",
-            [
-                {"dni_usuario": "12345678A", "num_serie": "B123"},
-                {"dni_usuario": "12345678A", "num_serie": "B456"},
-                {"dni_usuario": "98765432Z", "num_serie": "B789"},
-            ],
-            ["B123", "B456"],
-        ),
-        (
-            "98765432Z",
-            [
-                {"dni_usuario": "12345678A", "num_serie": "B123"},
-                {"dni_usuario": "12345678A", "num_serie": "B456"},
-                {"dni_usuario": "98765432Z", "num_serie": "B789"},
-            ],
-            ["B789"],
-        ),
-        (
-            "00000000X",
-            [
-                {"dni_usuario": "12345678A", "num_serie": "B123"},
-                {"dni_usuario": "12345678A", "num_serie": "B456"},
-            ],
-            [],
-        ),
-    ],
-)
-def test_listar_bicis_usuario_param(monkeypatch, dni, fake_data, expected):
-    """Comprueba que se devuelvan los números de series de las biciclestas del usuario introducido"""
-    monkeypatch.setattr("parking.rules.leer_csv_dic", lambda path: fake_data)
-    assert listar_bicis_usuario(dni) == expected
-
-
 # borrar_bici
 
 
@@ -341,30 +369,5 @@ def test_borrar_usuario_con_bicis(capfd):
         assert borrar_usuario("12345678A") is False
         assert (
             "ERROR: el usuario tiene bicicletas registradas, no se puede borrar"
-            in capfd.readouterr().out
-        )
-
-
-def test_borrar_usuario_ok(capfd):
-    """Comprueba que se borra un usuario y se muestra un mensaje de confirmación"""
-    with (
-        patch("parking.rules.es_dni_unico", return_value=False),
-        patch("parking.rules.listar_bicis_usuario", return_value=[]),
-        patch("parking.rules.borrar_filas"),
-    ):
-        assert borrar_usuario("12345678A") is True
-        assert "OK: usuario borrado" in capfd.readouterr().out
-
-
-def test_borrar_usuario_error_csv(capfd):
-    """Comprueba que se gestiona un error inesperado con un mensaje"""
-    with (
-        patch("parking.rules.es_dni_unico", return_value=False),
-        patch("parking.rules.listar_bicis_usuario", return_value=[]),
-        patch("parking.rules.borrar_filas", side_effect=Exception("fail")),
-    ):
-        assert borrar_usuario("12345678A") is False
-        assert (
-            "ERROR: ha habido un error inexperado al borrar del CSV"
             in capfd.readouterr().out
         )

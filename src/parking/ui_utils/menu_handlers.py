@@ -1,12 +1,8 @@
 """Archivo de funciones de interacciones en el menú de la aplicación"""
 
-from ..rules import (
-    borrar_bici,
-    borrar_usuario,
-    guardar_usuario,
-    guardar_bici,
-    registrar,
-)
+from parking.models.usuario import Usuario
+from parking.models.bici import Bici
+from parking.models.registro import Registro
 
 
 def preguntar_bool(texto: str) -> bool:
@@ -55,12 +51,16 @@ def menu_anadir_usuario() -> bool:
     nombre = preguntar_dato("Introduce tu nombre: ")
     email = preguntar_dato("Introduce tu email: ")
 
-    while not guardar_usuario(dni, nombre, email):
+    usuario = Usuario(dni, nombre, email)
+
+    while not usuario.guardar():
         if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
         dni = preguntar_dato("Introduce tu DNI con letra: ")
         nombre = preguntar_dato("Introduce tu nombre: ")
         email = preguntar_dato("Introduce tu email: ")
+
+        usuario = Usuario(dni, nombre, email)
 
     return True
 
@@ -74,11 +74,13 @@ def menu_borrar_usuario() -> bool:
         bool: True si se completa la operación
     """
     dni = preguntar_dato("Introduce tu DNI con letra: ")
+    usuario = Usuario(dni)
 
-    while not borrar_usuario(dni):
+    while not usuario.borrar():
         if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
         dni = preguntar_dato("Introduce tu DNI con letra: ")
+        usuario = Usuario(dni)
 
     return True
 
@@ -96,13 +98,16 @@ def menu_anadir_bici() -> bool:
     marca = preguntar_dato("Introduce la marca de tu bicicleta: ")
     modelo = preguntar_dato("Introduce el modelo de tu bicicleta: ")
 
-    while not guardar_bici(num_serie, dni, marca, modelo):
+    bici = Bici(num_serie, dni, marca, modelo)
+
+    while not bici.guardar():
         if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
         num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
         dni = preguntar_dato("Introduce tu DNI con letra: ")
         marca = preguntar_dato("Introduce la marca de tu bicicleta: ")
         modelo = preguntar_dato("Introduce el modelo de tu bicicleta: ")
+        bici = Bici(num_serie, dni, marca, modelo)
 
     return True
 
@@ -116,11 +121,13 @@ def menu_borrar_bici() -> bool:
         bool: True si se completa la operación
     """
     num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+    bici = Bici(num_serie)
 
-    while not borrar_bici(num_serie):
+    while not bici.borrar():
         if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
         num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+        bici = Bici(num_serie)
 
     return True
 
@@ -135,12 +142,14 @@ def registro_entrada() -> bool:
     """
     dni = preguntar_dato("Introduce tu DNI con letra: ")
     num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+    registro = Registro("IN", num_serie, dni)
 
-    while not registrar("IN", dni, num_serie):
+    while not registro.guardar():
         if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
         dni = preguntar_dato("Introduce tu DNI con letra: ")
         num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+        registro = Registro("IN", num_serie, dni)
 
     return True
 
@@ -155,11 +164,13 @@ def registro_salida() -> bool:
     """
     dni = preguntar_dato("Introduce tu DNI con letra: ")
     num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+    registro = Registro("OUT", num_serie, dni)
 
-    while not registrar("OUT", dni, num_serie):
+    while not registro.guardar():
         if not preguntar_bool("Intentarlo de nuevo? (S/N): "):
             return False
         dni = preguntar_dato("Introduce tu DNI con letra: ")
         num_serie = preguntar_dato("Introduce el número de serie de tu bicicleta: ")
+        registro = Registro("OUT", num_serie, dni)
 
     return True
