@@ -2,6 +2,7 @@
 
 from parking.data_utils.validators import es_campo_vacio, es_dni_unico, es_serie_unica
 from parking.data_utils.csv_utils import borrar_filas, escribir_csv_dic
+from parking.models.bd import Bd, BiciORM
 from ..config import BICIS_CSV
 
 
@@ -37,13 +38,6 @@ class Bici:
                 return False
         return True
 
-    def es_unico(self) -> bool:
-        if not es_serie_unica(self.num_serie):
-            print("ERROR: el número de serie ya está registrado")
-            return False
-        else:
-            return True
-
     def existe_usuario(self) -> bool:
         # Mirando si el DNI es unico en el csv sabemos si existe ya
         if not es_dni_unico(self.dni_usuario):
@@ -52,53 +46,56 @@ class Bici:
         else:
             return True
 
-    def crear_fila(self) -> dict:
+    def crear_fila(self) -> BiciORM:
         """
-        Devuelve los valores de la bici en formato diccionario
+        Devuelve los valores de la bici en formato ORM
 
         Returns:
-            dict: El diccionario
+            BiciORM: El objeto ORM
         """
-        return {
-            "num_serie": self.num_serie,
-            "dni_usuario": self.dni_usuario,
-            "marca": self.marca,
-            "modelo": self.modelo,
-        }
+        return BiciORM(self.num_serie, self.dni_usuario, self.marca, self.modelo)
 
-    def guardar(self) -> bool:
+    def guardar(self, bd: Bd) -> bool:
         """
         Guarda la bici en el csv siempre y cuando sea válida, única y tenga un usuario creado
 
         Returns:
             bool: True si se ha guardado la bici
         """
-        if self.es_valido() and self.es_unico() and self.existe_usuario():
-            try:
-                escribir_csv_dic(BICIS_CSV, [self.crear_fila()])
-                print("OK: se ha registrado la bicicleta")
-                return True
-            except:
-                print("ERROR: ha habido un error inexperado al escribir al CSV")
+        with bd.crear_sesion() as sesion:
+            if sesion.query(BiciORM).filter_by(num_serie=self.num_serie).first():
+                print("ERROR: el número de serie ya está registrado")
                 return False
-        else:
-            return False
+            elif self.es_valido():
+                try:
+                    sesion.add(self.crear_fila())
+                    print("OK: se ha registrado la bicicleta")
+                    return True
+                except:
+                    print("ERROR: ha habido un error inexperado al escribir al CSV")
+                    return False
+            else:
+                return False
 
-    def borrar(self) -> bool:
+    def borrar(self, bd: Bd) -> bool:
         """
         Intenta borrar la bici siempre y cuando tenga un número de serie válido
 
         Returns:
             bool: _description_
         """
-        if not self.es_unico():
-            try:
-                borrar_filas(BICIS_CSV, "num_serie", self.num_serie)
-                print("OK: bicicleta borrada")
-                return True
-            except:
-                print("ERROR: ha habido un error inexperado al borrar del CSV")
+        with bd.crear_sesion() as sesion:
+            bici = sesion.query(BiciORM).filter_by(num_serie=self.num_serie).first()
+            if bici:
+                try:
+                    sesion.delete(bici)
+                    print("OK: bicicleta borrada")
+                    return True
+                except:
+                    print(
+                        "ERROR: ha habido un error inexperado al borrar de la base de datos"
+                    )
+                    return False
+            else:
+                print("ERROR: la bicicleta no existe")
                 return False
-        else:
-            print("ERROR: la bicicleta no existe")
-            return False
