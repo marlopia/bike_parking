@@ -3,7 +3,7 @@
 
 import pytest
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from parking.config import TIMESTAMP_FMT
 
@@ -30,35 +30,35 @@ def test_guardar_usuario_dni_vacio(capfd):
     """Verifica que no guarde un DNI vacío y muestre el mensaje de error relevante"""
     with patch("parking.models.usuario.escribir_csv_dic"):
         assert Usuario("", "Ana", "ana@mail.com").guardar() is False
-        assert "ERROR: Campo DNI vacío" in capfd.readouterr().out
+        assert "ERROR: el DNI introducido no es válido" in capfd.readouterr().out
 
 
 def test_guardar_usuario_nombre_vacio(capfd):
     """Verifica que no guarde un nombre vacío y muestre el mensaje de error relevante"""
     with patch("parking.models.usuario.escribir_csv_dic"):
         assert Usuario("12345678A", "", "ana@mail.com").guardar() is False
-        assert "ERROR: Campo nombre vacío" in capfd.readouterr().out
+        assert "ERROR: el nombre no puede estar vacío" in capfd.readouterr().out
 
 
 def test_guardar_usuario_email_vacio(capfd):
     """Verifica que no guarde un email vacío y muestre el mensaje de error relevante"""
     with patch("parking.models.usuario.escribir_csv_dic"):
         assert Usuario("12345678A", "Ana", "").guardar() is False
-        assert "ERROR: Campo email vacío" in capfd.readouterr().out
+        assert "ERROR: el email introducido no es válido" in capfd.readouterr().out
 
 
 def test_guardar_usuario_dni_invalido(capfd):
     """Verifica que no guarde un DNI inválido y muestre el mensaje de error relevante"""
     with patch("parking.models.usuario.escribir_csv_dic"):
         assert Usuario("error", "Ana", "ana@mail.com").guardar() is False
-        assert "ERROR: Formato de DNI no reconocido" in capfd.readouterr().out
+        assert "ERROR: el DNI introducido no es válido" in capfd.readouterr().out
 
 
 def test_guardar_usuario_email_invalido(capfd):
     """Verifica que no guarde un email inválido y muestre el mensaje de error relevante"""
     with patch("parking.models.usuario.escribir_csv_dic"):
         assert Usuario("12345678A", "Ana", "error").guardar() is False
-        assert "ERROR: Formato de email no reconocido" in capfd.readouterr().out
+        assert "ERROR: el email introducido no es válido" in capfd.readouterr().out
 
 
 def test_guardar_usuario_dni_duplicado(capfd):
@@ -69,7 +69,7 @@ def test_guardar_usuario_dni_duplicado(capfd):
         patch("parking.models.usuario.escribir_csv_dic"),
     ):
         assert Usuario("12345678A", "Ana", "ana@mail.com").guardar() is False
-        assert "ERROR: El DNI 12345678A ya está registrado" in capfd.readouterr().out
+        assert "ERROR: el DNI introducido ya está registrado" in capfd.readouterr().out
 
 
 def test_guardar_usuario_email_duplicado(capfd):
@@ -81,7 +81,7 @@ def test_guardar_usuario_email_duplicado(capfd):
     ):
         assert Usuario("12345678A", "Ana", "ana@mail.com").guardar() is False
         assert (
-            "ERROR: El email ana@mail.com ya está registrado" in capfd.readouterr().out
+            "ERROR: el email introducido ya está registrado" in capfd.readouterr().out
         )
 
 
@@ -156,218 +156,249 @@ def test_borrar_usuario_error_csv(capfd):
         )
 
 
-# guardar_bici
+def test_borrar_usuario_no_existe(capfd):
+    """Comprueba que se muestra un mensaje de error cuando no existe el usuario"""
+    usuario = Usuario("12345678A")
+    usuario.bicis = []
+
+    with (
+        patch("parking.models.usuario.es_dni_unico", return_value=True),
+        patch("parking.models.usuario.borrar_filas"),
+    ):
+        assert usuario.borrar() is False
+        assert "ERROR: el DNI no existe o está mal escrito" in capfd.readouterr().out
+
+
+def test_borrar_usuario_con_bicis(capfd):
+    """Comprueba que se muestra un mensaje de error al borrar un usuario con bicis"""
+    usuario = Usuario("12345678A")
+    usuario.bicis = ["BK123"]
+
+    with (
+        patch("parking.models.usuario.es_dni_unico", return_value=False),
+        patch("parking.models.usuario.borrar_filas"),
+    ):
+        assert usuario.borrar() is False
+        assert (
+            "ERROR: el usuario tiene bicicletas registradas, no se puede eliminar"
+            in capfd.readouterr().out
+        )
+
+
+# Bici
+
+## Guardar
 
 
 def test_guardar_bici_ok(capfd):
     """Verifica que se guarde la bicicleta válida y muestre el mensaje de confirmación"""
     with (
-        patch("parking.rules.es_dni_unico", return_value=False),
-        patch("parking.rules.es_serie_unica", return_value=True),
-        patch("parking.rules.escribir_csv_dic"),
+        patch.object(Bici, "es_valido", return_value=True),
+        patch.object(Bici, "es_unico", return_value=True),
+        patch.object(Bici, "existe_usuario", return_value=True),
+        patch("parking.models.bici.escribir_csv_dic"),
     ):
-        assert guardar_bici("B123", "12345678A", "Orbea", "MX20") is True
+        assert Bici("B123", "12345678A", "Orbea", "MX20").guardar() is True
         assert "OK: se ha registrado la bicicleta" in capfd.readouterr().out
 
 
 def test_guardar_bici_serie_vacia(capfd):
     """Verifica que no se guarde el número de serie vacío y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_bici("", "12345678A", "Orbea", "MX20") is False
-        assert "ERROR: Campo número de serie vacío" in capfd.readouterr().out
+    with patch("parking.models.bici.escribir_csv_dic"):
+        assert Bici("", "12345678A", "Orbea", "MX20").guardar() is False
+        assert (
+            "ERROR: el campo num_serie no puede estar vacío" in capfd.readouterr().out
+        )
 
 
 def test_guardar_bici_dni_vacio(capfd):
     """Verifica que no se guarde el DNI vacío y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_bici("B123", "", "Orbea", "MX20") is False
-        assert "ERROR: Campo DNI vacío" in capfd.readouterr().out
+    with patch("parking.models.bici.escribir_csv_dic"):
+        assert Bici("B123", "", "Orbea", "MX20").guardar() is False
+        assert (
+            "ERROR: el campo dni_usuario no puede estar vacío" in capfd.readouterr().out
+        )
 
 
 def test_guardar_bici_marca_vacio(capfd):
     """Verifica que no se guarde la marca vacía y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_bici("B123", "12345678A", "", "MX20") is False
-        assert "ERROR: Campo marca vacío" in capfd.readouterr().out
+    with patch("parking.models.bici.escribir_csv_dic"):
+        assert Bici("B123", "12345678A", "", "MX20").guardar() is False
+        assert "ERROR: el campo marca no puede estar vacío" in capfd.readouterr().out
 
 
 def test_guardar_bici_modelo_vacio(capfd):
     """Verifica que no se guarde el modelo vacío y muestre el mensaje de error relevante"""
-    with patch("parking.rules.escribir_csv_dic"):
-        assert guardar_bici("B123", "12345678A", "Orbea", "") is False
-        assert "ERROR: Campo modelo vacío" in capfd.readouterr().out
+    with patch("parking.models.bici.escribir_csv_dic"):
+        assert Bici("B123", "12345678A", "Orbea", "").guardar() is False
+        assert "ERROR: el campo modelo no puede estar vacío" in capfd.readouterr().out
 
 
 def test_guardar_bici_dni_no_registrado(capfd):
     """Verifica que no se guarde el DNI no registrado y muestre el mensaje de error relevante"""
     with (
-        patch("parking.rules.es_dni_unico", return_value=True),
-        patch("parking.rules.es_serie_unica", return_value=True),
-        patch("parking.rules.escribir_csv_dic"),
+        patch.object(Bici, "es_valido", return_value=True),
+        patch.object(Bici, "es_unico", return_value=True),
+        patch("parking.models.bici.es_dni_unico", return_value=False),
+        patch("parking.models.bici.escribir_csv_dic"),
     ):
-        assert guardar_bici("B123", "12345678A", "Orbea", "MX20") is False
-        assert "ERROR: DNI no regristado en el sistema" in capfd.readouterr().out
+        assert Bici("B123", "12345678A", "Orbea", "MX20").guardar() is False
+        assert "ERROR: el usuario no está registrado" in capfd.readouterr().out
 
 
 def test_guardar_bici_serie_duplicado(capfd):
     """Verifica que no se guarde el número de serie duplicado y muestre el mensaje de error relevante"""
     with (
-        patch("parking.rules.es_dni_unico", return_value=False),
-        patch("parking.rules.es_serie_unica", return_value=False),
-        patch("parking.rules.escribir_csv_dic"),
+        patch.object(Bici, "es_valido", return_value=True),
+        patch("parking.models.bici.es_serie_unica", return_value=False),
+        patch.object(Bici, "existe_usuario", return_value=True),
+        patch("parking.models.bici.escribir_csv_dic"),
     ):
-        assert guardar_bici("B123", "12345678A", "Orbea", "MX20") is False
-        assert (
-            "ERROR: la bicicleta con el número de serie B123 ya está en el sistema"
-            in capfd.readouterr().out
-        )
+        assert Bici("B123", "12345678A", "Orbea", "MX20").guardar() is False
+        assert "ERROR: el número de serie ya está registrado" in capfd.readouterr().out
 
 
-# registrar
-
-
-def test_registrar_in_ok(capfd):
-    """Verifica que se guarda la entrada de la bicicleta correctamente y que muestre un mensaje de confirmación"""
-    with (
-        patch("parking.rules.puede_entrar", return_value=True),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-    ):
-        assert registrar("IN", "12345678A", "B123") is True
-        assert (
-            f"OK: registrado entrada bicicleta a las {datetime.now().strftime(TIMESTAMP_FMT)}"
-            in capfd.readouterr().out
-        )
-
-
-def test_registrar_in_bici_incorrecta(capfd):
-    """Verifica que no se guarda la entrada de la bicicleta que no es del usuario y que muestre un mensaje de error relevante"""
-    with (
-        patch("parking.rules.puede_entrar", return_value=True),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-    ):
-        assert registrar("IN", "12345678A", "BK001") is False
-        assert "ERROR: la bicicleta no pertenece al usuario" in capfd.readouterr().out
-
-
-def test_registrar_in_error(capfd):
-    """Verifica que no se guarda la entrada de la bicicleta incorrecta y que muestre un mensaje de error relevante"""
-    with (
-        patch("parking.rules.puede_entrar", return_value=False),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-    ):
-        assert registrar("IN", "12345678A", "B123") is False
-        assert "ERROR: la bicicleta no puede entrar" in capfd.readouterr().out
-
-
-def test_registrar_out_ok(capfd):
-    """Verifica que se guarda la salida de la bicicleta correctamente y que muestre un mensaje de confirmación"""
-    with (
-        patch("parking.rules.puede_salir", return_value=True),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-    ):
-        assert registrar("OUT", "12345678A", "B123") is True
-        assert (
-            f"OK: registrado salida bicicleta a las {datetime.now().strftime(TIMESTAMP_FMT)}"
-            in capfd.readouterr().out
-        )
-
-
-def test_registrar_out_error(capfd):
-    """Verifica que no se guarda la salida de la bicicleta incorrecta y que muestre un mensaje de error relevante"""
-    with (
-        patch("parking.rules.puede_salir", return_value=False),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-    ):
-        assert registrar("OUT", "12345678A", "B123") is False
-        assert "ERROR: la bicicleta no puede salir" in capfd.readouterr().out
-
-
-def test_registrar_out_bici_incorrecta(capfd):
-    """Verifica que no se guarda la salida de la bicicleta que no es del usuario y que muestre un mensaje de error relevante"""
-    with (
-        patch("parking.rules.puede_entrar", return_value=True),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-    ):
-        assert registrar("IN", "12345678A", "BK001") is False
-        assert "ERROR: la bicicleta no pertenece al usuario" in capfd.readouterr().out
-
-
-def test_registrar_invalido():
-    """Verifica que salte el error NotImplementedError al intentar usar una accion no programada"""
-    with (
-        patch("parking.rules.puede_entrar", return_value=True),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.escribir_csv_dic"),
-        pytest.raises(NotImplementedError),
-    ):
-        registrar("ALGO", "12345678A", "B123")
-
-
-# borrar_bici
-
-
+## Borrar
 def test_borrar_bici_no_existe(capfd):
     """Comprueba que se lanza el mensaje de error cuando no existe la bici a borrar"""
     with (
-        patch("parking.rules.es_serie_unica", return_value=True),
-        patch("parking.rules.borrar_filas"),
+        patch("parking.models.bici.es_serie_unica", return_value=True),
+        patch("parking.models.bici.borrar_filas"),
     ):
-        assert borrar_bici("B123") is False
-        assert (
-            "ERROR: no existe la bicicleta con ese número de serie"
-            in capfd.readouterr().out
-        )
+        assert Bici("B123").borrar() is False
+        assert "ERROR: la bicicleta no existe" in capfd.readouterr().out
 
 
 def test_borrar_bici_ok(capfd):
     """Comprueba que se borra la bici con exito y se lanza el mensaje de confirmación"""
     with (
-        patch("parking.rules.es_serie_unica", return_value=False),
-        patch("parking.rules.borrar_filas"),
+        patch("parking.models.bici.es_serie_unica", return_value=False),
+        patch("parking.models.bici.borrar_filas"),
     ):
-        assert borrar_bici("B123") is True
+        assert Bici("B123").borrar() is True
         assert "OK: bicicleta borrada" in capfd.readouterr().out
 
 
 def test_borrar_bici_error_csv(capfd):
     """Comprueba que se gestiona un error inexperado con un mensaje"""
     with (
-        patch("parking.rules.es_serie_unica", return_value=False),
-        patch("parking.rules.borrar_filas", side_effect=Exception("fail")),
+        patch("parking.models.bici.es_serie_unica", return_value=False),
+        patch("parking.models.bici.borrar_filas", side_effect=Exception("fail")),
     ):
-        assert borrar_bici("B123") is False
+        assert Bici("B123").borrar() is False
         assert (
             "ERROR: ha habido un error inexperado al borrar del CSV"
             in capfd.readouterr().out
         )
 
 
-def test_borrar_usuario_no_existe(capfd):
-    """Comprueba que se muestra un mensaje de error cuando no existe el usuario"""
-    with (
-        patch("parking.rules.es_dni_unico", return_value=True),
-        patch("parking.rules.listar_bicis_usuario"),
-        patch("parking.rules.borrar_filas"),
-    ):
-        assert borrar_usuario("12345678A") is False
-        assert "ERROR: no existe ese DNI en el registro" in capfd.readouterr().out
+# Registro
+
+## Guardar
 
 
-def test_borrar_usuario_con_bicis(capfd):
-    """Comprueba que se muestra un mensaje de error al borrar un usuario con bicis"""
+def test_registrar_in_ok(capfd):
+    """Verifica que se guarda la entrada de la bicicleta correctamente y que muestre un mensaje de confirmación"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
     with (
-        patch("parking.rules.es_dni_unico", return_value=False),
-        patch("parking.rules.listar_bicis_usuario", return_value=["B123"]),
-        patch("parking.rules.borrar_filas"),
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_entrar", return_value=True),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
     ):
-        assert borrar_usuario("12345678A") is False
+        assert Registro("IN", "B123", "12345678A").guardar() is True
+        assert "OK: se ha registrado el registro" in capfd.readouterr().out
+
+
+def test_registrar_in_bici_incorrecta(capfd):
+    """Verifica que no se guarda la entrada de la bicicleta que no es del usuario y que muestre un mensaje de error relevante"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
+    with (
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_entrar", return_value=True),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
+    ):
+        assert Registro("IN", "error", "12345678A").guardar() is False
+        assert "ERROR: esta bicicleta NO pertenece al usuario" in capfd.readouterr().out
+
+
+def test_registrar_in_error(capfd):
+    """Verifica que no se guarda la entrada de la bicicleta incorrecta y que muestre un mensaje de error relevante"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
+    with (
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_entrar", return_value=False),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
+    ):
+        assert Registro("IN", "B123", "12345678A").guardar() is False
+        assert "ERROR: Esta bicicleta no puede entrar" in capfd.readouterr().out
+
+
+def test_registrar_out_ok(capfd):
+    """Verifica que se guarda la salida de la bicicleta correctamente y que muestre un mensaje de confirmación"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
+    with (
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_salir", return_value=True),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
+    ):
+        assert Registro("OUT", "B123", "12345678A").guardar() is True
+        assert "OK: se ha registrado el registro" in capfd.readouterr().out
+
+
+def test_registrar_out_error(capfd):
+    """Verifica que no se guarda la salida de la bicicleta incorrecta y que muestre un mensaje de error relevante"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
+    with (
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_salir", return_value=False),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
+    ):
+        assert Registro("OUT", "B123", "12345678A").guardar() is False
+        assert "ERROR: Esta bicicleta no puede salir" in capfd.readouterr().out
+
+
+def test_registrar_out_bici_incorrecta(capfd):
+    """Verifica que no se guarda la salida de la bicicleta que no es del usuario y que muestre un mensaje de error relevante"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
+    with (
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_salir", return_value=True),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
+    ):
+        assert Registro("OUT", "error", "12345678A").guardar() is False
+        assert "ERROR: esta bicicleta NO pertenece al usuario" in capfd.readouterr().out
+
+
+def test_registrar_invalido(capfd):
+    """Verifica que no se guarda el registro si la acción no es válida y que muestre un mensaje de error relevante"""
+    usuario_mock = MagicMock()
+    usuario_mock.bicis = ["B123"]
+
+    with (
+        patch.object(Registro, "es_valido", return_value=True),
+        patch("parking.models.registro.puede_salir", return_value=True),
+        patch("parking.models.registro.escribir_csv_dic"),
+        patch("parking.models.registro.Usuario", return_value=usuario_mock),
+    ):
+        assert Registro("error", "B123", "12345678A").guardar() is False
         assert (
-            "ERROR: el usuario tiene bicicletas registradas, no se puede borrar"
-            in capfd.readouterr().out
+            "ERROR: Las acciones aceptadas son solo IN y OUT" in capfd.readouterr().out
         )

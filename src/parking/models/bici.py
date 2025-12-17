@@ -31,7 +31,7 @@ class Bici:
         Returns:
             bool: True si válida
         """
-        for key, value in vars(self).values():
+        for key, value in vars(self).items():
             if es_campo_vacio(value):
                 print(f"ERROR: el campo {key} no puede estar vacío")
                 return False
@@ -91,7 +91,7 @@ class Bici:
         Returns:
             bool: _description_
         """
-        if self.es_unico():
+        if not self.es_unico():
             try:
                 borrar_filas(BICIS_CSV, "num_serie", self.num_serie)
                 print("OK: bicicleta borrada")
@@ -100,4 +100,5 @@ class Bici:
                 print("ERROR: ha habido un error inexperado al borrar del CSV")
                 return False
         else:
+            print("ERROR: la bicicleta no existe")
             return False

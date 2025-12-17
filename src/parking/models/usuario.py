@@ -40,7 +40,7 @@ class Usuario:
         if not es_dni_valido(self.dni):
             print("ERROR: el DNI introducido no es válido")
             return False
-        elif not es_email_unico(self.email):
+        elif not es_email_valido(self.email):
             print("ERROR: el email introducido no es válido")
             return False
         elif es_campo_vacio(self.nombre):

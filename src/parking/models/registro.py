@@ -37,7 +37,7 @@ class Registro:
         Returns:
             bool: True si valido.
         """
-        for key, value in vars(self).values():
+        for key, value in vars(self).items():
             if es_campo_vacio(value):
                 print(f"ERROR: el campo {key} no puede estar vacío")
                 return False
@@ -71,6 +71,7 @@ class Registro:
             else:
                 return True
         else:
+            print("ERROR: Las acciones aceptadas son solo IN y OUT")
             return False
 
     def crear_fila(self) -> dict:
