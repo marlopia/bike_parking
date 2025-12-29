@@ -6,12 +6,8 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-mock_bd = MagicMock()
-with (
-    patch("parking.models.usuario.bd", mock_bd),
-    patch("parking.models.bici.bd", mock_bd),
-    patch("parking.models.registro.bd", mock_bd),
-):
+mock_bd_class = MagicMock()
+with patch("parking.models.bd.Bd", mock_bd_class):
     from parking.models.usuario import Usuario
     from parking.models.bici import Bici
     from parking.models.registro import Registro
