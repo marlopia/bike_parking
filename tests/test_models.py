@@ -6,18 +6,16 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from parking.models.bd import BiciORM, RegistroORM, UsuarioORM
-from parking.models.usuario import Usuario
-from parking.models.bici import Bici
-from parking.models.registro import Registro
-
-
-@pytest.fixture(autouse=True)
-def mock_bd(monkeypatch):
-    mock_bd_instance = MagicMock()
-    monkeypatch.setattr("parking.models.usuario.bd", mock_bd_instance)
-    monkeypatch.setattr("parking.models.bici.bd", mock_bd_instance)
-    monkeypatch.setattr("parking.models.registro.bd", mock_bd_instance)
+mock_bd = MagicMock()
+with (
+    patch("parking.models.usuario.bd", mock_bd),
+    patch("parking.models.bici.bd", mock_bd),
+    patch("parking.models.registro.bd", mock_bd),
+):
+    from parking.models.usuario import Usuario
+    from parking.models.bici import Bici
+    from parking.models.registro import Registro
+    from parking.models.bd import UsuarioORM, BiciORM, RegistroORM
 
 
 # Usuario
