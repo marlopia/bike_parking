@@ -1,8 +1,11 @@
+from unittest.mock import MagicMock, patch
 import pytest
 import sys
 from pathlib import Path
 
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from parking.models.bd import RegistroORM
 from parking.data_utils.validators import (
     es_campo_vacio,
     es_dni_unico,
@@ -14,7 +17,6 @@ from parking.data_utils.validators import (
     puede_entrar,
     puede_salir,
 )
-from parking.data_utils.csv_utils import leer_csv_dic
 
 
 # es_dni_valido
@@ -108,81 +110,97 @@ def mock_leer_csv(monkeypatch):
 
 # es_dni_unico
 @pytest.mark.parametrize("test_dni", ["12345678A", "87654321B", "12121212Z"])
-def test_es_dni_unico_nuevo(test_dni, mock_leer_csv):
-    """Comprueba que se devuelva True en el validador si el DNI no coincide con ninguno del csv"""
-    mock_leer_csv(
-        [{"dni": "99999999Z", "nombre": "Ana López", "email": "ana@example.com"}]
-    )
-    assert es_dni_unico(test_dni) is True
+def test_es_dni_unico_nuevo(test_dni):
+    """Comprueba que se devuelva True en el validador si el DNI no coincide con ninguno de la base de datos"""
+    mock_sesion = MagicMock()
+    mock_sesion.query.return_value.filter_by.return_value.first.return_value = None
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.usuario.bd.crear_sesion", return_value=mock_cm):
+        assert es_dni_unico(test_dni) is True
 
 
 @pytest.mark.parametrize("test_dni", ["99999999Z"])
-def test_es_dni_unico_duplicado(test_dni, mock_leer_csv):
-    """Comprueba que se devuelva False en el validador si el DNI coincide con alguno del csv"""
-    mock_leer_csv(
-        [{"dni": "99999999Z", "nombre": "Ana López", "email": "ana@example.com"}]
-    )
-    assert es_dni_unico(test_dni) is False
+def test_es_dni_unico_duplicado(test_dni):
+    """Comprueba que se devuelva False en el validador si el DNI coincide con alguno de la base de datos"""
+    mock_sesion = MagicMock()
+    mock_sesion.query.return_value.filter_by.return_value.first.return_value = object()
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.usuario.bd.crear_sesion", return_value=mock_cm):
+        assert es_dni_unico(test_dni) is False
 
 
 # es_email_unico
 @pytest.mark.parametrize(
     "test_email", ["test@gmail.es", "okay@yahoo.fr", "correct@proton.tv"]
 )
-def test_es_email_unico_nuevo(test_email, mock_leer_csv):
-    """Comprueba que se devuelva True en el validador si el email no coincide con ninguno del csv"""
-    mock_leer_csv(
-        [{"dni": "99999999Z", "nombre": "Ana López", "email": "ana@example.com"}]
-    )
-    assert es_email_unico(test_email) is True
+def test_es_email_unico_nuevo(test_email):
+    """Comprueba que se devuelva True en el validador si el email no coincide con ninguno de la base de datos"""
+    mock_sesion = MagicMock()
+    mock_sesion.query.return_value.filter_by.return_value.first.return_value = None
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.usuario.bd.crear_sesion", return_value=mock_cm):
+        assert es_email_unico(test_email) is True
 
 
 @pytest.mark.parametrize(
     "test_email", ["ANA@example.com", "ana@example.com", "ana@EXAMPLE.com"]
 )
-def test_es_email_unico_duplicado(test_email, mock_leer_csv):
+def test_es_email_unico_duplicado(test_email):
     """
     Comprueba que se devuelva False en el validador si el
-    email coincide con alguno del csv,
+    email coincide con alguno de la base de datos,
     sin importar mayusculas o minusculas
     """
-    mock_leer_csv(
-        [{"dni": "99999999Z", "nombre": "Ana López", "email": "ANA@example.com"}]
-    )
-    assert es_email_unico(test_email) is False
+    mock_sesion = MagicMock()
+    mock_sesion.query.return_value.filter_by.return_value.first.return_value = object()
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.usuario.bd.crear_sesion", return_value=mock_cm):
+        assert es_email_unico(test_email) is False
 
 
 # es_serie_unica
 @pytest.mark.parametrize("test_serie", ["BK002", "BK003", "BK004"])
 def test_es_serie_unica_nuevo(test_serie, mock_leer_csv):
-    """Comprueba que se devuelva True en el validador si la serie no coincide con ninguna del csv"""
-    mock_leer_csv(
-        [
-            {
-                "num_serie": "BK001",
-                "dni_usuario": "99999999Z",
-                "marca": "Orbea",
-                "modelo": "Carpe",
-            }
-        ]
-    )
-    assert es_serie_unica(test_serie) is True
+    """Comprueba que se devuelva True en el validador si la serie no coincide con ninguna de la base de datos"""
+    mock_sesion = MagicMock()
+    mock_sesion.query.return_value.filter_by.return_value.first.return_value = None
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.bici.bd.crear_sesion", return_value=mock_cm):
+        assert es_serie_unica(test_serie) is True
 
 
 @pytest.mark.parametrize("test_serie", ["BK001"])
 def test_es_serie_unica_duplicado(test_serie, mock_leer_csv):
-    """Comprueba que se devuelva False en el validador si la serie coincide con alguno del csv"""
-    mock_leer_csv(
-        [
-            {
-                "num_serie": "BK001",
-                "dni_usuario": "99999999Z",
-                "marca": "Orbea",
-                "modelo": "Carpe",
-            }
-        ]
-    )
-    assert es_serie_unica(test_serie) is False
+    """Comprueba que se devuelva False en el validador si la serie coincide con alguno de la base de datos"""
+    mock_sesion = MagicMock()
+    mock_sesion.query.return_value.filter_by.return_value.first.return_value = object()
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.bici.bd.crear_sesion", return_value=mock_cm):
+        assert es_serie_unica(test_serie) is False
 
 
 # es_campo_vacio
@@ -214,126 +232,68 @@ def test_normalizar_texto(test_text, expected):
 
 
 # puede_entrar
+
+
 @pytest.mark.parametrize(
-    "test_serie,mock_data",
+    "accion_ultima,esperado",
     [
-        (
-            "BK001",
-            [
-                {
-                    "timestamp": "2025-03-01 08:15:22",
-                    "accion": "IN",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-                {
-                    "timestamp": "2025-03-01 08:17:22",
-                    "accion": "OUT",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-            ],
-        ),
-        ("BK001", []),
+        ("OUT", True),
+        (None, True),
+        ("IN", False),
     ],
 )
-def test_puede_entrar_correcto(test_serie, mock_data, mock_leer_csv):
-    """
-    Comprueba que el validador vea que el ultimo estado de la bici
-    es OUT o que no ha sido introducida
-    """
-    mock_leer_csv(mock_data)
-    assert puede_entrar(test_serie) is True
-
-
-@pytest.mark.parametrize(
-    "test_serie,mock_data",
-    [
-        (
-            "BK001",
-            [
-                {
-                    "timestamp": "2025-03-01 08:15:22",
-                    "accion": "OUT",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-                {
-                    "timestamp": "2025-03-01 08:17:22",
-                    "accion": "IN",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-            ],
+def test_puede_entrar(accion_ultima, esperado):
+    """Comprueba que puede_entrar devuelva los valores esperados según la última ocurrencia de registro"""
+    mock_sesion = MagicMock()
+    if accion_ultima is None:
+        mock_sesion.query.return_value.filter_by.return_value.order_by.return_value.first.return_value = (
+            None
         )
-    ],
-)
-def test_puede_entrar_incorrecto(test_serie, mock_data, mock_leer_csv):
-    """
-    Comprueba que el validador vea que el ultimo estado de la bici
-    es OUT o que no ha sido introducida,
-    como es IN devuelve False
-    """
-    mock_leer_csv(mock_data)
-    assert puede_entrar(test_serie) is False
-
-
-# puede_salir
-@pytest.mark.parametrize(
-    "test_serie,mock_data",
-    [
-        (
-            "BK001",
-            [
-                {
-                    "timestamp": "2025-03-01 08:15:22",
-                    "accion": "OUT",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-                {
-                    "timestamp": "2025-03-01 08:17:22",
-                    "accion": "IN",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-            ],
+    else:
+        mock_sesion.query.return_value.filter_by.return_value.order_by.return_value.first.return_value = RegistroORM(
+            timestamp="2025-12-29 12:00:00",
+            accion=accion_ultima,
+            num_serie="BK001",
+            dni_usuario="12345678A",
         )
-    ],
-)
-def test_puede_salir_correcto(test_serie, mock_data, mock_leer_csv):
-    """Comprueba que el validador vea que el ultimo estado de la bici es IN"""
-    mock_leer_csv(mock_data)
-    assert puede_salir(test_serie) is True
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.registro.bd.crear_sesion", return_value=mock_cm):
+        assert puede_entrar("BK001") is esperado
+
+
+# puede salir
 
 
 @pytest.mark.parametrize(
-    "test_serie,mock_data",
+    "accion_ultima,esperado",
     [
-        (
-            "BK001",
-            [
-                {
-                    "timestamp": "2025-03-01 08:15:22",
-                    "accion": "IN",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-                {
-                    "timestamp": "2025-03-01 08:17:22",
-                    "accion": "OUT",
-                    "num_serie": "BK001",
-                    "dni_usuario": "12345678A",
-                },
-            ],
-        ),
-        ("BK001", []),
+        ("IN", True),
+        ("OUT", False),
+        (None, False),
     ],
 )
-def test_puede_salir_incorrecto(test_serie, mock_data, mock_leer_csv):
-    """
-    Comprueba que el validador vea que el ultimo estado de la bici es IN,
-    si ya esta fuera o nunca ha sido introducida devuelve False
-    """
-    mock_leer_csv(mock_data)
-    assert puede_salir(test_serie) is False
+def test_puede_salir(accion_ultima, esperado):
+    """Comprueba que puede_salir devuelva los valores esperados según la última ocurrencia de registro"""
+    mock_sesion = MagicMock()
+    if accion_ultima is None:
+        mock_sesion.query.return_value.filter_by.return_value.order_by.return_value.first.return_value = (
+            None
+        )
+    else:
+        mock_sesion.query.return_value.filter_by.return_value.order_by.return_value.first.return_value = RegistroORM(
+            timestamp="2025-12-29 12:00:00",
+            accion=accion_ultima,
+            num_serie="BK001",
+            dni_usuario="12345678A",
+        )
+
+    mock_cm = MagicMock()
+    mock_cm.__enter__.return_value = mock_sesion
+    mock_cm.__exit__.return_value = False
+
+    with patch("parking.models.registro.bd.crear_sesion", return_value=mock_cm):
+        assert puede_salir("BK001") is esperado

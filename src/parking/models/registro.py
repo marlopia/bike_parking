@@ -1,4 +1,4 @@
-"""Clase que representa una fila del csv de bicis"""
+"""Clase que representa una fila de la base de datos de bicis"""
 
 from datetime import datetime
 

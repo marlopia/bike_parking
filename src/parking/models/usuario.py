@@ -1,4 +1,4 @@
-"""Clase que representa una fila del csv de usuarios"""
+"""Clase que representa una fila de la base de datos de usuarios"""
 
 from parking.data_utils.validators import (
     es_dni_valido,
@@ -92,6 +92,9 @@ class Usuario:
             usuario = sesion.query(UsuarioORM).filter_by(dni=self.dni).first()
             if not usuario:
                 print("ERROR: el DNI no existe o está mal escrito")
+                return False
+            elif len(self.bicis) is not 0:
+                print("ERROR: el usuario tiene bicis asignadas, no se puede borrar")
                 return False
             else:
                 try:

@@ -1,4 +1,4 @@
-"""Clase que representa una fila del csv de bicis"""
+"""Clase que representa una fila de la base de datos de bicis"""
 
 from parking.data_utils.validators import es_campo_vacio, es_dni_unico
 from parking.models.bd import Bd, BiciORM
