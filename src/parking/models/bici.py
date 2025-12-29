@@ -1,9 +1,9 @@
 """Clase que representa una fila del csv de bicis"""
 
-from parking.data_utils.validators import es_campo_vacio, es_dni_unico, es_serie_unica
-from parking.data_utils.csv_utils import borrar_filas, escribir_csv_dic
+from parking.data_utils.validators import es_campo_vacio, es_dni_unico
 from parking.models.bd import Bd, BiciORM
-from ..config import BICIS_CSV
+
+bd = Bd()
 
 
 class Bici:
@@ -55,7 +55,7 @@ class Bici:
         """
         return BiciORM(self.num_serie, self.dni_usuario, self.marca, self.modelo)
 
-    def guardar(self, bd: Bd) -> bool:
+    def guardar(self) -> bool:
         """
         Guarda la bici en el csv siempre y cuando sea válida, única y tenga un usuario creado
 
@@ -77,7 +77,7 @@ class Bici:
             else:
                 return False
 
-    def borrar(self, bd: Bd) -> bool:
+    def borrar(self) -> bool:
         """
         Intenta borrar la bici siempre y cuando tenga un número de serie válido
 

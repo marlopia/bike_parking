@@ -6,6 +6,8 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
 
+DB_NAME = "data/bd.db"
+
 
 # ====== MODELOS ORM ======
 class UsuarioORM(Base):
@@ -13,6 +15,11 @@ class UsuarioORM(Base):
     dni = Column(String, primary_key=True)
     nombre = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
+
+    def __init__(self, dni: str, nombre: str, email: str):
+        self.dni = dni
+        self.nombre = nombre
+        self.email = email
 
 
 class BiciORM(Base):
@@ -22,6 +29,12 @@ class BiciORM(Base):
     marca = Column(String, nullable=False)
     modelo = Column(String, nullable=False)
 
+    def __init__(self, num_serie: str, dni_usuario: str, marca: str, modelo: str):
+        self.num_serie = num_serie
+        self.dni_usuario = dni_usuario
+        self.marca = marca
+        self.modelo = modelo
+
 
 class RegistroORM(Base):
     __tablename__ = "registros"
@@ -30,10 +43,24 @@ class RegistroORM(Base):
     num_serie = Column(String, ForeignKey("bicis.num_serie"), nullable=False)
     dni_usuario = Column(String, ForeignKey("usuarios.dni"), nullable=False)
 
+    def __init__(self, timestamp: str, accion: str, num_serie: str, dni_usuario: str):
+        self.timestamp = timestamp
+        self.accion = accion
+        self.num_serie = num_serie
+        self.dni_usuario = dni_usuario
+
 
 # ====== BD MANAGER ======
 class Bd:
-    def __init__(self, db_file="bd.db"):
+    _instance = None
+
+    def __new__(cls, db_file=DB_NAME):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._init(db_file)
+        return cls._instance
+
+    def _init(self, db_file=DB_NAME):
         self.engine = create_engine(f"sqlite:///{db_file}", echo=False)
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)

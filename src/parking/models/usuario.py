@@ -1,16 +1,12 @@
 """Clase que representa una fila del csv de usuarios"""
 
-from sqlalchemy.orm import Session
 from parking.data_utils.validators import (
     es_dni_valido,
-    es_dni_unico,
     es_email_valido,
-    es_email_unico,
-    es_campo_vacio,
 )
-from parking.data_utils.csv_utils import borrar_filas, escribir_csv_dic, leer_csv_dic
-from parking.models.bd import Bd, UsuarioORM
-from ..config import BICIS_CSV, USUARIOS_CSV
+from parking.models.bd import Bd, BiciORM, UsuarioORM
+
+bd = Bd()
 
 
 class Usuario:
@@ -28,9 +24,9 @@ class Usuario:
         self.nombre = nombre
         self.email = email
         self.bicis = []
-        for fila in leer_csv_dic(BICIS_CSV):
-            if fila["dni_usuario"] == dni:
-                self.bicis.append(fila["num_serie"])
+        with bd.crear_sesion() as sesion:
+            for bici in sesion.query(BiciORM).filter_by(dni_usuario=dni).all():
+                self.bicis.append(bici)
 
     def es_valido(self) -> bool:
         """
@@ -57,7 +53,7 @@ class Usuario:
         """
         return UsuarioORM(self.dni, self.nombre, self.email)
 
-    def guardar(self, bd: Bd) -> bool:
+    def guardar(self) -> bool:
         """
         Guarda el usuario en el csv siempre y cuando sea válido y único
 
@@ -85,7 +81,7 @@ class Usuario:
             else:
                 return False
 
-    def borrar(self, bd: Bd) -> bool:
+    def borrar(self) -> bool:
         """
         Intenta borrar el usuario siempre y cuando ya exista el DNI y no tenga bicis asociadas
 

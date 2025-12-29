@@ -1,9 +1,15 @@
 """Paquete de validaciones para comprobar entrada de datos y consistencias de datos en los archivos"""
 
 import re
+from typing import Optional
 
-from .csv_utils import leer_csv_dic
+from sqlalchemy import desc
+
+from parking.models.bd import Bd, BiciORM, RegistroORM, UsuarioORM
 from ..config import PATRON_DNI, PATRON_EMAIL, USUARIOS_CSV, BICIS_CSV, REGISTROS_CSV
+
+
+bd = Bd()
 
 
 def es_dni_valido(dni: str) -> bool:
@@ -34,7 +40,7 @@ def es_email_valido(email: str) -> bool:
 
 def es_dni_unico(dni: str) -> bool:
     """
-    Valida que un DNI no aparezca en el csv de usuarios
+    Valida que un DNI no aparezca en la tabla de usuarios
 
     Args:
         dni (str): DNI a validar
@@ -42,17 +48,16 @@ def es_dni_unico(dni: str) -> bool:
     Returns:
         bool: Si no existe el DNI devuelve True, si existe False
     """
-    filas = leer_csv_dic(USUARIOS_CSV)
-    for fila in filas:
-        if fila["dni"] == dni:
+    with bd.crear_sesion() as sesion:
+        if sesion.query(UsuarioORM).filter_by(dni=dni).first():
             return False
-
-    return True
+        else:
+            return True
 
 
 def es_email_unico(email: str) -> bool:
     """
-    Valida que un email no aparezca en el csv de usuarios
+    Valida que un email no aparezca en la tabla de usuarios
 
     Args:
         email (str): email a validar
@@ -60,17 +65,16 @@ def es_email_unico(email: str) -> bool:
     Returns:
         bool: Si no existe el email devuelve True, si existe False
     """
-    filas = leer_csv_dic(USUARIOS_CSV)
-    for fila in filas:
-        if normalizar_texto(fila["email"]) == normalizar_texto(email):
+    with bd.crear_sesion() as sesion:
+        if sesion.query(UsuarioORM).filter_by(email=email).first():
             return False
-
-    return True
+        else:
+            return True
 
 
 def es_serie_unica(num_serie: str) -> bool:
     """
-    Valida que una serie no aparezca en el csv de bicis
+    Valida que una serie no aparezca en la tabla de bicis
 
     Args:
         num_serie (str): número de serie a validar
@@ -78,12 +82,11 @@ def es_serie_unica(num_serie: str) -> bool:
     Returns:
         bool: Si no existe el DNI devuelve True, si existe False
     """
-    filas = leer_csv_dic(BICIS_CSV)
-    for fila in filas:
-        if fila["num_serie"] == num_serie:
+    with bd.crear_sesion() as sesion:
+        if sesion.query(BiciORM).filter_by(num_serie=num_serie).first():
             return False
-
-    return True
+        else:
+            return True
 
 
 def es_campo_vacio(text: str) -> bool:
@@ -122,14 +125,20 @@ def puede_entrar(num_serie: str) -> bool:
     Returns:
         bool: True si la bici nunca ha entrado o su último estado es OUT
     """
-    filas = leer_csv_dic(REGISTROS_CSV)
-    estado = None
-    for fila in reversed(filas):  # Ordena de más reciente
-        if fila["num_serie"] == num_serie:
-            estado = fila["accion"]
-            break
+    with bd.crear_sesion() as sesion:
+        registro_reciente: Optional[RegistroORM] = (
+            sesion.query(RegistroORM)
+            .filter_by(num_serie=num_serie)
+            .order_by(desc(RegistroORM.timestamp))
+            .first()
+        )
 
-    return estado == "OUT" or estado == None
+        if registro_reciente is None:
+            return True  # La bici entra por primera vez
+        elif registro_reciente.accion == "OUT":  # type: ignore
+            return True  # Ultima accion fue OUT
+        else:
+            return False
 
 
 def puede_salir(num_serie: str) -> bool:
@@ -142,11 +151,17 @@ def puede_salir(num_serie: str) -> bool:
     Returns:
         bool: True si el último estado de la bici es IN
     """
-    filas = leer_csv_dic(REGISTROS_CSV)
-    estado = None
-    for fila in reversed(filas):  # Ordena de más reciente
-        if fila["num_serie"] == num_serie:
-            estado = fila["accion"]
-            break
+    with bd.crear_sesion() as sesion:
+        registro_reciente: Optional[RegistroORM] = (
+            sesion.query(RegistroORM)
+            .filter_by(num_serie=num_serie)
+            .order_by(desc(RegistroORM.timestamp))
+            .first()
+        )
 
-    return estado == "IN"
+        if registro_reciente is None:
+            return False  # La bici nunca ha entrado, no puede salir
+        elif registro_reciente.accion == "IN":  # type: ignore
+            return True  # Ultima accion fue IN
+        else:
+            return False

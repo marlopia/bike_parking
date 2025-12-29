@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+from parking.models.bd import Bd, RegistroORM
 from parking.models.usuario import Usuario
 from parking.data_utils.validators import (
     es_campo_vacio,
@@ -10,8 +11,9 @@ from parking.data_utils.validators import (
     es_dni_unico,
     es_serie_unica,
 )
-from parking.data_utils.csv_utils import escribir_csv_dic
-from ..config import REGISTROS_CSV, TIMESTAMP_FMT
+from ..config import TIMESTAMP_FMT
+
+bd = Bd()
 
 
 class Registro:
@@ -74,19 +76,16 @@ class Registro:
             print("ERROR: Las acciones aceptadas son solo IN y OUT")
             return False
 
-    def crear_fila(self) -> dict:
+    def crear_fila(self) -> RegistroORM:
         """
-        Devuelve los valores de la bici en formato diccionario
+        Devuelve los valores del registro en formato ORM
 
         Returns:
-            dict: El diccionario
+            dict: El objeto ORM
         """
-        return {
-            "timestamp": self.timestamp,
-            "accion": self.accion,
-            "num_serie": self.num_serie,
-            "dni_usuario": self.dni_usuario,
-        }
+        return RegistroORM(
+            self.timestamp, self.accion, self.num_serie, self.dni_usuario
+        )
 
     def guardar(self) -> bool:
         """
@@ -102,7 +101,8 @@ class Registro:
                 return False
             else:
                 try:
-                    escribir_csv_dic(REGISTROS_CSV, [self.crear_fila()])
+                    with bd.crear_sesion() as sesion:
+                        sesion.add(self.crear_fila())
                     print("OK: se ha registrado el registro")
                     return True
                 except:
