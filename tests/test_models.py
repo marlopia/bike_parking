@@ -1,4 +1,3 @@
-# TODO: portar tests
 """Archivo de pruebas de rules.py, no toca disco"""
 
 from pathlib import Path
@@ -11,6 +10,15 @@ from parking.models.bd import BiciORM, RegistroORM, UsuarioORM
 from parking.models.usuario import Usuario
 from parking.models.bici import Bici
 from parking.models.registro import Registro
+
+
+@pytest.fixture(autouse=True)
+def mock_bd(monkeypatch):
+    mock_bd_instance = MagicMock()
+    monkeypatch.setattr("parking.models.usuario.bd", mock_bd_instance)
+    monkeypatch.setattr("parking.models.bici.bd", mock_bd_instance)
+    monkeypatch.setattr("parking.models.registro.bd", mock_bd_instance)
+
 
 # Usuario
 
