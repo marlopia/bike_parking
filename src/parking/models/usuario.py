@@ -33,7 +33,8 @@ class Usuario(Base):
         self.bicis = []
         # Cargar bicis desde la BD
         with bd.crear_sesion() as sesion:
-            self.bicis = sesion.query(BiciORM).filter_by(dni_usuario=dni).all()
+            bicis_orm = sesion.query(BiciORM).filter_by(dni_usuario=dni).all()
+            self.bicis = [bici.toJSON() for bici in bicis_orm]
 
     @classmethod
     def obtener_o_crear(cls, dni: str, nombre: str = "", email: str = "") -> "Usuario":

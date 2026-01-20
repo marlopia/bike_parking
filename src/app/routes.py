@@ -24,7 +24,8 @@ def login_submit():
         return "Debes enviar un usuario válido", 400
 
     if es_usuario_registrado(dni):
-        session["dni"] = buscar_usuario_por_dni(dni).nombre
+        session["nombre"] = buscar_usuario_por_dni(dni).nombre
+        session["dni"] = dni
         return redirect(url_for("main.landing"))
     else:
         return redirect(url_for("main.login_form"))
@@ -53,8 +54,21 @@ def register_submit():
 
 @main.route("/landing")
 def landing():
-    user = session.get("user")
+    user = session.get("nombre")
+    bicis = buscar_usuario_por_dni(session.get("dni")).bicis  # type: ignore viene validada por login
     if not user:
         return redirect(url_for("main.login_form"))
 
-    return render_template("landing.html", username=user)
+    return render_template("landing.html", username=user, bicis=bicis)
+
+
+@main.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("main.index"))
+
+
+@main.route("/delete", methods=["POST"])
+def delete():
+    # TODO implementar borrado seguro con auth de usuario
+    return "BORRARIAS: " + str(request.form.get("num_serie"))

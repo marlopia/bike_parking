@@ -23,6 +23,14 @@ class BiciORM(Base):
         self.marca = marca
         self.modelo = modelo
 
+    def toJSON(self):
+        return {
+            "num_serie": self.num_serie,
+            "dni_usuario": self.dni_usuario,
+            "marca": self.marca,
+            "modelo": self.modelo,
+        }
+
 
 class RegistroORM(Base):
     __tablename__ = "registros"

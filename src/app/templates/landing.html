@@ -12,6 +12,38 @@
 
     <p>Hola "{{ username }}"</p>
 
+    <h2>Tus bicis:</h2>
+    <br />
+    <table>
+      <thead>
+        <tr>
+          <th>Número de serie</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Borrar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bici in bicis %}
+        <tr>
+          <td>{{ bici.num_serie }}</td>
+          <td>{{ bici.marca }}</td>
+          <td>{{ bici.modelo }}</td>
+          <td>
+            <form action="/delete" method="post">
+              <input type="hidden" name="num_serie" value="{{ bici.num_serie }}">
+              <button type="submit">Borrar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <form action="/logout">
+      <button type="submit">Logout</button>
+    </form>
+
     <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
   </body>
 </html>
