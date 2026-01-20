@@ -5,14 +5,14 @@ from typing import Optional
 
 from sqlalchemy import desc
 
-from parking.models.bd import Bd, BiciORM, RegistroORM, UsuarioORM
-from ..config import PATRON_DNI, PATRON_EMAIL, USUARIOS_CSV, BICIS_CSV, REGISTROS_CSV
+from parking.models.bd import Bd, BiciORM, RegistroORM
+from ..config import PATRON_DNI, PATRON_EMAIL
 
 
 bd = Bd()
 
 
-def es_dni_valido(dni: str) -> bool:
+def es_dni_valido(dni: str) -> bool:  # TODO eliminar una vez refactorizada
     """
     Valida que un DNI tenga 8 digitos y una letra mayúscula o minúscula.
 
@@ -38,7 +38,7 @@ def es_email_valido(email: str) -> bool:
     return bool(re.match(PATRON_EMAIL, email))
 
 
-def es_dni_unico(dni: str) -> bool:
+def es_dni_unico(dni: str) -> bool:  # TODO eliminar una vez refactorizada
     """
     Valida que un DNI no aparezca en la tabla de usuarios
 
@@ -49,7 +49,9 @@ def es_dni_unico(dni: str) -> bool:
         bool: Si no existe el DNI devuelve True, si existe False
     """
     with bd.crear_sesion() as sesion:
-        if sesion.query(UsuarioORM).filter_by(dni=dni).first():
+        from parking.models.usuario import Usuario  # TODO temp
+
+        if sesion.query(Usuario).filter_by(dni=dni).first():
             return False
         else:
             return True
@@ -66,7 +68,9 @@ def es_email_unico(email: str) -> bool:
         bool: Si no existe el email devuelve True, si existe False
     """
     with bd.crear_sesion() as sesion:
-        if sesion.query(UsuarioORM).filter_by(email=email).first():
+        from parking.models.usuario import Usuario  # TODO temp
+
+        if sesion.query(Usuario).filter_by(email=email).first():
             return False
         else:
             return True

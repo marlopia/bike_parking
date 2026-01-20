@@ -2,6 +2,8 @@
 
 from flask import Blueprint, redirect, render_template, request, session, url_for
 
+from app.logic import buscar_usuario_por_dni, es_usuario_registrado, es_dni_valido
+
 main = Blueprint("main", __name__)
 
 
@@ -17,16 +19,15 @@ def login_form():
 
 @main.route("/login", methods=["POST"])
 def login_submit():
-    username = request.form.get("user")
-    if not username:
-        return "Debes enviar un usuario", 400
+    dni = request.form.get("dni")
+    if not dni or es_dni_valido(dni):
+        return "Debes enviar un usuario válido", 400
 
-    # TODO logica comprobar usuario y añadirlo a la sesion
-    # Si no existe redirigir a login con error
-    session["user"] = username
-
-    # Si existe redirige a landing/dashboard
-    return redirect(url_for("main.landing"))
+    if es_usuario_registrado(dni):
+        session["dni"] = buscar_usuario_por_dni(dni).nombre
+        return redirect(url_for("main.landing"))
+    else:
+        return redirect(url_for("main.login_form"))
 
 
 @main.route("/register", methods=["GET"])

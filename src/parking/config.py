@@ -4,6 +4,8 @@ DATA_DIR = "data"
 TESTS_DIR = "tests"
 
 PATRON_DNI = r"^\d{8}[A-Za-z]$"
+LETRAS_DNI = "TRWAGMYFPDXBNJZSQVHLCKE"
+
 PATRON_EMAIL = r"^[\w\.\-]+@[\w\.\-]+\.\w+$"
 
 USUARIOS_CSV = f"{DATA_DIR}/usuarios.csv"

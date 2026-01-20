@@ -10,18 +10,6 @@ DB_NAME = "data/bd.db"
 
 
 # ====== MODELOS ORM ======
-class UsuarioORM(Base):
-    __tablename__ = "usuarios"
-    dni = Column(String, primary_key=True)
-    nombre = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-
-    def __init__(self, dni: str, nombre: str, email: str):
-        self.dni = dni
-        self.nombre = nombre
-        self.email = email
-
-
 class BiciORM(Base):
     __tablename__ = "bicis"
     num_serie = Column(String, primary_key=True)
