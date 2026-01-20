@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/landing.css') }}"
+    />
+    <title>Inicio</title>
+  </head>
+  <body>
+    <h1>Mi app</h1>
+
+    <p>Hola "{{ username }}"</p>
+
+    <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+  </body>
+</html>

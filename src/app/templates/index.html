@@ -1,10 +1,23 @@
 <!doctype html>
 <html>
-<head>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-  <h1>Hello Flask</h1>
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+    <title>Inicio</title>
+  </head>
+  <body>
+    <h1>Mi app</h1>
+
+    <form action="/login" method="get">
+      <button type="submit">Login</button>
+    </form>
+
+    <form action="/register" method="get">
+      <button type="submit">Registrar</button>
+    </form>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+  </body>
 </html>

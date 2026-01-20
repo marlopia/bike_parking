@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/login.css') }}"
+    />
+    <title>Inicio</title>
+  </head>
+  <body>
+    <h1>Mi app</h1>
+
+    <form action="/login" method="post">
+      <label for="user">DNI:</label>
+      <input
+        type="text"
+        name="user"
+        required
+        placeholder="12345678A"
+        pattern="^\d{8}[A-Za-z]$"
+      />
+      <button type="submit">Login</button>
+    </form>
+
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+  </body>
+</html>
