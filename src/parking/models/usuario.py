@@ -37,15 +37,13 @@ class Usuario(Base):
             self.bicis = [bici.toJSON() for bici in bicis_orm]
 
     @classmethod
-    def obtener_o_crear(cls, dni: str, nombre: str = "", email: str = "") -> "Usuario":
+    def obtener_usuario(cls, dni: str) -> "Usuario":
         """
         Devuelve la instancia del Usuario con ese DNI si existe,
         sino crea una nueva.
 
         Args:
-            dni (str): DNI del usuario, tiene que ser único
-            nombre (str, optional): Nombre del usuario. Por defecto vacío.
-            email (str, optional): Email del usuario, tiene que ser único. Por defecto vacío.
+            dni (str): DNI del usuario
         Returns:
             Usuario: El usuario
         """
@@ -59,8 +57,7 @@ class Usuario(Base):
                 )
                 return usuario
             else:
-                usuario = cls(dni=dni, nombre=nombre, email=email)
-                return usuario
+                raise UsuarioError("DNI no encontrado")
 
     def es_valido(self) -> bool:
         """
@@ -70,63 +67,49 @@ class Usuario(Base):
             bool: True si valido.
         """
         if not es_dni_valido(self.dni):
-            print("ERROR: el DNI introducido no es válido")
             return False
         if not es_email_valido(self.email):
-            print("ERROR: el email introducido no es válido")
             return False
         return True
 
-    def guardar(self) -> bool:
-        """
-        Guarda el usuario en la base de datos siempre y cuando sea válido y único
-
-        Returns:
-            bool: True si se ha guardado el usuario
-        """
+    def guardar(self) -> None:
+        """Guarda el usuario en la base de datos siempre y cuando sea válido y único"""
         if not self.es_valido():
-            return False
+            raise UsuarioError("ERROR: El usuario no es válido")
 
         with bd.crear_sesion() as sesion:
             # Comprobar unicidad
             if sesion.query(Usuario).filter_by(dni=self.dni).first():
-                print("ERROR: el DNI introducido ya está registrado")
-                return False
+                raise UsuarioError("ERROR: El DNI introducido ya está registrado")
             if sesion.query(Usuario).filter_by(email=self.email).first():
-                print("ERROR: el email introducido ya está registrado")
-                return False
+                raise UsuarioError("ERROR: El email introducido ya está registrado")
             try:
                 sesion.add(self)
-                print("OK: se ha registrado el usuario")
-                return True
             except Exception as e:
-                print(
+                raise UsuarioError(
                     f"ERROR: ha habido un error inesperado al escribir en la base de datos: {e}"
                 )
-                return False
 
-    def borrar(self) -> bool:
-        """
-        Intenta borrar el usuario siempre y cuando ya exista el DNI y no tenga bicis asociadas
-
-        Returns:
-            bool: True si se ha borrado el usuario
-        """
+    def borrar(self) -> None:
+        """Intenta borrar el usuario siempre y cuando ya exista el DNI y no tenga bicis asociadas"""
         if len(self.bicis) != 0:
-            print("ERROR: el usuario tiene bicis asignadas, no se puede borrar")
-            return False
+            raise UsuarioError(
+                "ERROR: El usuario tiene bicicletas asociadas, no se puede borrar"
+            )
 
         with bd.crear_sesion() as sesion:
             usuario = sesion.query(Usuario).filter_by(dni=self.dni).first()
             if not usuario:
-                print("ERROR: el DNI no existe o está mal escrito")
-                return False
+                raise UsuarioError("ERROR: El DNI no existe en la base de datos")
             try:
                 sesion.delete(usuario)
-                print("OK: usuario borrado")
-                return True
             except Exception as e:
-                print(
+                raise UsuarioError(
                     f"ERROR: ha habido un error inesperado al borrar de la base de datos: {e}"
                 )
-                return False
+
+
+class UsuarioError(Exception):
+    """Error genérico de gestión de usuario"""
+
+    pass

@@ -2,7 +2,14 @@
 
 from flask import Blueprint, redirect, render_template, request, session, url_for
 
-from app.logic import buscar_usuario_por_dni, es_usuario_registrado, es_dni_valido
+from app.logic import (
+    es_email_registrado,
+    obtener_usuario,
+    es_email_valido,
+    es_usuario_registrado,
+    es_dni_valido,
+    registrar_usuario,
+)
 
 main = Blueprint("main", __name__)
 
@@ -20,11 +27,11 @@ def login_form():
 @main.route("/login", methods=["POST"])
 def login_submit():
     dni = request.form.get("dni")
-    if not dni or es_dni_valido(dni):
-        return "Debes enviar un usuario válido", 400
+    if not dni or not es_dni_valido(dni):
+        return "Debes enviar un DNI válido", 400
 
     if es_usuario_registrado(dni):
-        session["nombre"] = buscar_usuario_por_dni(dni).nombre
+        session["nombre"] = obtener_usuario(dni).nombre
         session["dni"] = dni
         return redirect(url_for("main.landing"))
     else:
@@ -43,19 +50,24 @@ def register_submit():
     email = request.form.get("email")
     if not nombre or not dni or not email:
         return "Faltan datos", 400
-
-    # TODO logica comprobar registro usuario y añadirlo a la sesion
-    # Si no existe redirigir a login con error
-    session["user"] = nombre
-
-    # Si existe redirige a landing/dashboard
-    return redirect(url_for("main.landing"))
+    elif not es_dni_valido(dni):
+        return "Debes enviar un DNI válido", 400
+    elif not es_email_valido(email):
+        return "Debes enviar un email válido", 400
+    elif es_usuario_registrado(dni):
+        return "Este DNI ya está registrado", 400
+    elif es_email_registrado(email):
+        return "Este email ya está registrado", 400
+    else:
+        registrar_usuario(nombre, dni, email)
+        session["user"] = nombre
+        return redirect(url_for("main.landing"))
 
 
 @main.route("/landing")
 def landing():
     user = session.get("nombre")
-    bicis = buscar_usuario_por_dni(session.get("dni")).bicis  # type: ignore viene validada por login
+    bicis = obtener_usuario(session.get("dni")).bicis  # type: ignore viene validada por login
     if not user:
         return redirect(url_for("main.login_form"))
 

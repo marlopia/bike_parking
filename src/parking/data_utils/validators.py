@@ -25,7 +25,7 @@ def es_dni_valido(dni: str) -> bool:  # TODO eliminar una vez refactorizada
     return bool(re.match(PATRON_DNI, dni))
 
 
-def es_email_valido(email: str) -> bool:
+def es_email_valido(email: str) -> bool:  # TODO eliminar una vez refactorizada
     """
     Valida que un email conste de texto seguido de arroba y un dominio.
 
