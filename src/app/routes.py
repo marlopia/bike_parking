@@ -60,7 +60,8 @@ def register_submit():
         return "Este email ya está registrado", 400
     else:
         registrar_usuario(nombre, dni, email)
-        session["user"] = nombre
+        session["nombre"] = nombre
+        session["dni"] = dni
         return redirect(url_for("main.landing"))
 
 

@@ -3,12 +3,10 @@
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from parking.data_utils.validators import es_dni_unico
-from parking.models.bd import Bd, Base
-
-bd = Bd()
+from app import db
 
 
-class Bici(Base):
+class Bici(db.Model):
 
     __tablename__ = "bicis"
 
@@ -17,7 +15,9 @@ class Bici(Base):
     usuario: Mapped["Usuario"] = relationship("Usuario", back_populates="bicis")  # type: ignore
     marca: Mapped[str] = mapped_column(String, nullable=False)
     modelo: Mapped[str] = mapped_column(String, nullable=False)
-    registro: Mapped[list["Registro"]] = relationship("Registro", back_populates="bicis")  # type: ignore
+    registros: Mapped[list["Registro"]] = relationship(  # type: ignore
+        "Registro", back_populates="bici", lazy="joined"
+    )
 
     def __init__(
         self, num_serie: str, dni_usuario: str = "", marca: str = "", modelo: str = ""
@@ -48,12 +48,11 @@ class Bici(Base):
         Raises:
             BiciError: Si no existe una bici con ese número de serie en la base de datos
         """
-        with bd.crear_sesion() as sesion:
-            bici_orm = sesion.query(cls).filter_by(num_serie=num_serie).first()
-            if bici_orm:
-                return bici_orm
-            else:
-                raise BiciError("Número de serie no encontrado")
+        bici_orm = cls.query.filter_by(num_serie=num_serie).first()
+        if bici_orm:
+            return bici_orm
+        else:
+            raise BiciError("Número de serie no encontrado")
 
     def es_valido(self) -> bool:
         """
@@ -80,31 +79,33 @@ class Bici(Base):
             return True
 
     def guardar(self) -> None:
-        """Guarda la bici en el csv siempre y cuando sea válida, única y tenga un usuario creado"""
-        with bd.crear_sesion() as sesion:
-            if sesion.query(Bici).filter_by(num_serie=self.num_serie).first():
-                raise BiciError("ERROR: el número de serie ya está registrado")
-            elif self.es_valido():
-                try:
-                    sesion.add(self)
-                except:
-                    raise BiciError(
-                        "ERROR: ha habido un error inexperado al escribir en la base de datos"
-                    )
+        """Guarda la bici en la base de datos siempre y cuando sea válida, única y tenga un usuario creado"""
+        if Bici.query.filter_by(num_serie=self.num_serie).first():
+            raise BiciError("ERROR: el número de serie ya está registrado")
+        elif self.es_valido():
+            try:
+                db.session.add(self)
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise BiciError(
+                    "ERROR: ha habido un error inexperado al escribir en la base de datos"
+                )
 
     def borrar(self) -> None:
         """Intenta borrar la bici siempre y cuando tenga un número de serie válido"""
-        with bd.crear_sesion() as sesion:
-            bici = sesion.query(Bici).filter_by(num_serie=self.num_serie).first()
-            if bici:
-                try:
-                    sesion.delete(self)
-                except:
-                    raise BiciError(
-                        "ERROR: ha habido un error inexperado al borrar de la base de datos"
-                    )
-            else:
-                raise BiciError("ERROR: la bicicleta no existe")
+        bici = Bici.query.filter_by(num_serie=self.num_serie).first()
+        if bici:
+            try:
+                db.session.delete(bici)
+                db.session.commit()
+            except:
+                db.session.rollback()
+                raise BiciError(
+                    "ERROR: ha habido un error inexperado al borrar de la base de datos"
+                )
+        else:
+            raise BiciError("ERROR: la bicicleta no existe")
 
 
 class BiciError(Exception):

@@ -1,10 +1,14 @@
 """Objeto para gestionar la conexión a la base de datos"""
 
 from contextlib import contextmanager
-from sqlalchemy import ForeignKey, create_engine, Column, Integer, String
+from pathlib import Path
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DB_NAME = BASE_DIR / "data" / "bd.db"
 
 DB_NAME = "data/bd.db"
 

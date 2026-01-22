@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from parking.models.bd import Bd, Base
+from app import db
 from parking.models.usuario import Usuario
 from parking.data_utils.validators import (
     puede_entrar,
@@ -14,15 +14,13 @@ from parking.data_utils.validators import (
 )
 from ..config import TIMESTAMP_FMT
 
-bd = Bd()
 
-
-class Registro(Base):
+class Registro(db.Model):
 
     __tablename__ = "registros"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     timestamp: Mapped[str] = mapped_column(String, nullable=False)
-    accion: Mapped[str] = mapped_column(nullable=False)
+    accion: Mapped[str] = mapped_column(String, nullable=False)
 
     num_serie: Mapped[str] = mapped_column(
         String, ForeignKey("bicis.num_serie"), nullable=False
@@ -54,18 +52,17 @@ class Registro(Base):
         Devuelve la instancia del Registro según un ID interno
 
         Args:
-            num_serie (str): Número de serie de la bici
+            id (int): ID interno del registro
         Returns:
-            Bici: La bici
+            Registro: El registro
         Raises:
-            BiciError: Si no existe una bici con ese número de serie en la base de datos
+            RegistroError: Si no existe un registro con ese ID en la base de datos
         """
-        with bd.crear_sesion() as sesion:
-            registro_orm = sesion.query(cls).filter_by(id=id).first()
-            if registro_orm:
-                return registro_orm
-            else:
-                raise RegistroError("ID no encontrado")
+        registro_orm = cls.query.filter_by(id=id).first()
+        if registro_orm:
+            return registro_orm
+        else:
+            raise RegistroError("ID no encontrado")
 
     def es_valido(self) -> bool:
         """
@@ -106,16 +103,18 @@ class Registro(Base):
             return False
 
     def guardar(self) -> None:
-        """Guarda el registro en el csv siempre y cuando sea válido y tenga un usuario y bici creados"""
+        """Guarda el registro en la base de datos siempre y cuando sea válido y tenga un usuario y bici creados"""
 
         if self.es_valido() and self.es_permitido():
-            if not self.num_serie in Usuario(self.dni_usuario).bicis:
+            usuario = Usuario.obtener_usuario(self.dni_usuario)
+            if not any(bici.num_serie == self.num_serie for bici in usuario.bicis):
                 raise RegistroError("ERROR: esta bicicleta NO pertenece al usuario")
             else:
                 try:
-                    with bd.crear_sesion() as sesion:
-                        sesion.add(self.crear_fila())
+                    db.session.add(self)
+                    db.session.commit()
                 except:
+                    db.session.rollback()
                     raise RegistroError(
                         "ERROR: ha habido un error inexperado al escribir en la base de datos"
                     )

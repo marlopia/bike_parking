@@ -4,19 +4,22 @@ from typing import List
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from parking.data_utils.validators import es_dni_valido, es_email_valido
-from parking.models.bd import Bd, Base
 from parking.models.bici import Bici
+from app import db
 
-bd = Bd()
 
-
-class Usuario(Base):
+class Usuario(db.Model):
     __tablename__ = "usuarios"
 
     dni: Mapped[str] = mapped_column(String, primary_key=True)
     nombre: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    bicis: Mapped[list[Bici]] = relationship("Bici", back_populates="usuario")
+    bicis: Mapped[list[Bici]] = relationship(
+        "Bici", back_populates="usuario", lazy="joined"
+    )
+    registros: Mapped[list["Registro"]] = relationship(  # type: ignore
+        "Registro", back_populates="usuario", lazy="joined"
+    )
 
     def __init__(self, dni: str, nombre: str = "", email: str = "") -> None:
         """
@@ -46,12 +49,11 @@ class Usuario(Base):
         Raises:
             UsuarioError: Si no existe un Usuario con ese DNI en la base de datos
         """
-        with bd.crear_sesion() as sesion:
-            usuario_orm = sesion.query(cls).filter_by(dni=dni).first()
-            if usuario_orm:
-                return usuario_orm
-            else:
-                raise UsuarioError("DNI no encontrado")
+        usuario = cls.query.filter_by(dni=dni).first()
+        if usuario:
+            return usuario
+        else:
+            raise UsuarioError("DNI no encontrado")
 
     def es_valido(self) -> bool:
         """
@@ -71,18 +73,20 @@ class Usuario(Base):
         if not self.es_valido():
             raise UsuarioError("ERROR: El usuario no es válido")
 
-        with bd.crear_sesion() as sesion:
-            # Comprobar unicidad
-            if sesion.query(Usuario).filter_by(dni=self.dni).first():
-                raise UsuarioError("ERROR: El DNI introducido ya está registrado")
-            if sesion.query(Usuario).filter_by(email=self.email).first():
-                raise UsuarioError("ERROR: El email introducido ya está registrado")
-            try:
-                sesion.add(self)
-            except Exception as e:
-                raise UsuarioError(
-                    f"ERROR: ha habido un error inesperado al escribir en la base de datos: {e}"
-                )
+        # Comprobar unicidad
+        if Usuario.query.filter_by(dni=self.dni).first():
+            raise UsuarioError("ERROR: El DNI introducido ya está registrado")
+        if Usuario.query.filter_by(email=self.email).first():
+            raise UsuarioError("ERROR: El email introducido ya está registrado")
+
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise UsuarioError(
+                f"ERROR: ha habido un error inesperado al escribir en la base de datos: {e}"
+            )
 
     def borrar(self) -> None:
         """Intenta borrar el usuario siempre y cuando ya exista el DNI y no tenga bicis asociadas"""
@@ -91,16 +95,18 @@ class Usuario(Base):
                 "ERROR: El usuario tiene bicicletas asociadas, no se puede borrar"
             )
 
-        with bd.crear_sesion() as sesion:
-            usuario = sesion.query(Usuario).filter_by(dni=self.dni).first()
-            if not usuario:
-                raise UsuarioError("ERROR: El DNI no existe en la base de datos")
-            try:
-                sesion.delete(usuario)
-            except Exception as e:
-                raise UsuarioError(
-                    f"ERROR: ha habido un error inesperado al borrar de la base de datos: {e}"
-                )
+        usuario = Usuario.query.filter_by(dni=self.dni).first()
+        if not usuario:
+            raise UsuarioError("ERROR: El DNI no existe en la base de datos")
+
+        try:
+            db.session.delete(usuario)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise UsuarioError(
+                f"ERROR: ha habido un error inesperado al borrar de la base de datos: {e}"
+            )
 
 
 class UsuarioError(Exception):
