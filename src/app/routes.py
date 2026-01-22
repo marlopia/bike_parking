@@ -67,11 +67,12 @@ def register_submit():
 @main.route("/landing")
 def landing():
     user = session.get("nombre")
+    dni = session.get("dni")
     bicis = obtener_usuario(session.get("dni")).bicis  # type: ignore viene validada por login
     if not user:
         return redirect(url_for("main.login_form"))
 
-    return render_template("landing.html", username=user, bicis=bicis)
+    return render_template("landing.html", username=user, dni=dni, bicis=bicis)
 
 
 @main.route("/logout")
@@ -80,7 +81,7 @@ def logout():
     return redirect(url_for("main.index"))
 
 
-@main.route("/delete", methods=["POST"])
+@main.route("/delete_bike", methods=["POST"])
 def delete():
     # TODO implementar borrado seguro con auth de usuario
     return "BORRARIAS: " + str(request.form.get("num_serie"))

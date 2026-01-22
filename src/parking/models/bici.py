@@ -1,12 +1,23 @@
 """Clase que representa una fila de la base de datos de bicis"""
 
-from parking.data_utils.validators import es_campo_vacio, es_dni_unico
-from parking.models.bd import Bd, BiciORM
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from parking.data_utils.validators import es_dni_unico
+from parking.models.bd import Bd, Base
 
 bd = Bd()
 
 
-class Bici:
+class Bici(Base):
+
+    __tablename__ = "bicis"
+
+    num_serie: Mapped[str] = mapped_column(String, primary_key=True)
+    dni_usuario: Mapped[str] = mapped_column(ForeignKey("usuarios.dni"), nullable=False)
+    usuario: Mapped["Usuario"] = relationship("Usuario", back_populates="bicis")  # type: ignore
+    marca: Mapped[str] = mapped_column(String, nullable=False)
+    modelo: Mapped[str] = mapped_column(String, nullable=False)
+    registro: Mapped[list["Registro"]] = relationship("Registro", back_populates="bicis")  # type: ignore
 
     def __init__(
         self, num_serie: str, dni_usuario: str = "", marca: str = "", modelo: str = ""
@@ -25,6 +36,25 @@ class Bici:
         self.marca = marca
         self.modelo = modelo
 
+    @classmethod
+    def obtener_bici(cls, num_serie: str) -> "Bici":
+        """
+        Devuelve la instancia de la Bici con ese número de serie si existe
+
+        Args:
+            num_serie (str): Número de serie de la bici
+        Returns:
+            Bici: La bici
+        Raises:
+            BiciError: Si no existe una bici con ese número de serie en la base de datos
+        """
+        with bd.crear_sesion() as sesion:
+            bici_orm = sesion.query(cls).filter_by(num_serie=num_serie).first()
+            if bici_orm:
+                return bici_orm
+            else:
+                raise BiciError("Número de serie no encontrado")
+
     def es_valido(self) -> bool:
         """
         Valida que la bici esté bien formada sin campos vacíos
@@ -33,69 +63,51 @@ class Bici:
             bool: True si válida
         """
         for key, value in vars(self).items():
-            if es_campo_vacio(value):
-                print(f"ERROR: el campo {key} no puede estar vacío")
+            if value == "":
                 return False
         return True
 
     def existe_usuario(self) -> bool:
-        # Mirando si el DNI es unico en el csv sabemos si existe ya
+        """
+        Valida si existe el usuario para asociarle la bici
+
+        Returns:
+            bool: True si existe
+        """
         if not es_dni_unico(self.dni_usuario):
-            print("ERROR: el usuario no está registrado")
             return False
         else:
             return True
 
-    def crear_fila(self) -> BiciORM:
-        """
-        Devuelve los valores de la bici en formato ORM
-
-        Returns:
-            BiciORM: El objeto ORM
-        """
-        return BiciORM(self.num_serie, self.dni_usuario, self.marca, self.modelo)
-
-    def guardar(self) -> bool:
-        """
-        Guarda la bici en el csv siempre y cuando sea válida, única y tenga un usuario creado
-
-        Returns:
-            bool: True si se ha guardado la bici
-        """
+    def guardar(self) -> None:
+        """Guarda la bici en el csv siempre y cuando sea válida, única y tenga un usuario creado"""
         with bd.crear_sesion() as sesion:
-            if sesion.query(BiciORM).filter_by(num_serie=self.num_serie).first():
-                print("ERROR: el número de serie ya está registrado")
-                return False
+            if sesion.query(Bici).filter_by(num_serie=self.num_serie).first():
+                raise BiciError("ERROR: el número de serie ya está registrado")
             elif self.es_valido():
                 try:
-                    sesion.add(self.crear_fila())
-                    print("OK: se ha registrado la bicicleta")
-                    return True
+                    sesion.add(self)
                 except:
-                    print("ERROR: ha habido un error inexperado al escribir al CSV")
-                    return False
-            else:
-                return False
+                    raise BiciError(
+                        "ERROR: ha habido un error inexperado al escribir en la base de datos"
+                    )
 
-    def borrar(self) -> bool:
-        """
-        Intenta borrar la bici siempre y cuando tenga un número de serie válido
-
-        Returns:
-            bool: _description_
-        """
+    def borrar(self) -> None:
+        """Intenta borrar la bici siempre y cuando tenga un número de serie válido"""
         with bd.crear_sesion() as sesion:
-            bici = sesion.query(BiciORM).filter_by(num_serie=self.num_serie).first()
+            bici = sesion.query(Bici).filter_by(num_serie=self.num_serie).first()
             if bici:
                 try:
-                    sesion.delete(bici)
-                    print("OK: bicicleta borrada")
-                    return True
+                    sesion.delete(self)
                 except:
-                    print(
+                    raise BiciError(
                         "ERROR: ha habido un error inexperado al borrar de la base de datos"
                     )
-                    return False
             else:
-                print("ERROR: la bicicleta no existe")
-                return False
+                raise BiciError("ERROR: la bicicleta no existe")
+
+
+class BiciError(Exception):
+    """Error genérico de gestión de bici"""
+
+    pass

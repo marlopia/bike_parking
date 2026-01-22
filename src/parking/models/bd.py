@@ -9,43 +9,6 @@ Base = declarative_base()
 DB_NAME = "data/bd.db"
 
 
-# ====== MODELOS ORM ======
-class BiciORM(Base):
-    __tablename__ = "bicis"
-    num_serie = Column(String, primary_key=True)
-    dni_usuario = Column(String, ForeignKey("usuarios.dni"), nullable=False)
-    marca = Column(String, nullable=False)
-    modelo = Column(String, nullable=False)
-
-    def __init__(self, num_serie: str, dni_usuario: str, marca: str, modelo: str):
-        self.num_serie = num_serie
-        self.dni_usuario = dni_usuario
-        self.marca = marca
-        self.modelo = modelo
-
-    def toJSON(self):
-        return {
-            "num_serie": self.num_serie,
-            "dni_usuario": self.dni_usuario,
-            "marca": self.marca,
-            "modelo": self.modelo,
-        }
-
-
-class RegistroORM(Base):
-    __tablename__ = "registros"
-    timestamp = Column(String, primary_key=True)
-    accion = Column(String)
-    num_serie = Column(String, ForeignKey("bicis.num_serie"), nullable=False)
-    dni_usuario = Column(String, ForeignKey("usuarios.dni"), nullable=False)
-
-    def __init__(self, timestamp: str, accion: str, num_serie: str, dni_usuario: str):
-        self.timestamp = timestamp
-        self.accion = accion
-        self.num_serie = num_serie
-        self.dni_usuario = dni_usuario
-
-
 # ====== BD MANAGER ======
 class Bd:
     _instance = None

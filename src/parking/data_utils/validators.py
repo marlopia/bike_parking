@@ -5,7 +5,7 @@ from typing import Optional
 
 from sqlalchemy import desc
 
-from parking.models.bd import Bd, BiciORM, RegistroORM
+from parking.models.bd import Bd
 from ..config import PATRON_DNI, PATRON_EMAIL
 
 
@@ -86,24 +86,13 @@ def es_serie_unica(num_serie: str) -> bool:
     Returns:
         bool: Si no existe el DNI devuelve True, si existe False
     """
+    from parking.models.bici import Bici  # TODO temp circular import
+
     with bd.crear_sesion() as sesion:
-        if sesion.query(BiciORM).filter_by(num_serie=num_serie).first():
+        if sesion.query(Bici).filter_by(num_serie=num_serie).first():
             return False
         else:
             return True
-
-
-def es_campo_vacio(text: str) -> bool:
-    """
-    Valida que el texto introducido no esté vacío.
-
-    Args:
-        text (str): Texto introducido
-
-    Returns:
-        bool: True si el texto es vacío, False si no
-    """
-    return text == ""
 
 
 def normalizar_texto(text: str) -> str:
@@ -129,11 +118,14 @@ def puede_entrar(num_serie: str) -> bool:
     Returns:
         bool: True si la bici nunca ha entrado o su último estado es OUT
     """
+
+    from parking.models.registro import Registro  # TODO temp circular import
+
     with bd.crear_sesion() as sesion:
-        registro_reciente: Optional[RegistroORM] = (
-            sesion.query(RegistroORM)
+        registro_reciente: Optional[Registro] = (
+            sesion.query(Registro)
             .filter_by(num_serie=num_serie)
-            .order_by(desc(RegistroORM.timestamp))
+            .order_by(desc(Registro.timestamp))
             .first()
         )
 
@@ -155,11 +147,14 @@ def puede_salir(num_serie: str) -> bool:
     Returns:
         bool: True si el último estado de la bici es IN
     """
+
+    from parking.models.registro import Registro  # TODO temp circular import
+
     with bd.crear_sesion() as sesion:
-        registro_reciente: Optional[RegistroORM] = (
-            sesion.query(RegistroORM)
+        registro_reciente: Optional[Registro] = (
+            sesion.query(Registro)
             .filter_by(num_serie=num_serie)
-            .order_by(desc(RegistroORM.timestamp))
+            .order_by(desc(Registro.timestamp))
             .first()
         )
 

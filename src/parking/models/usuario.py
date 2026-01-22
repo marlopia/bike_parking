@@ -1,9 +1,11 @@
 """Clase que representa una fila de la base de datos de usuarios y su lógica"""
 
 from typing import List
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from parking.data_utils.validators import es_dni_valido, es_email_valido
-from parking.models.bd import Bd, BiciORM, Base
+from parking.models.bd import Bd, Base
+from parking.models.bici import Bici
 
 bd = Bd()
 
@@ -11,10 +13,10 @@ bd = Bd()
 class Usuario(Base):
     __tablename__ = "usuarios"
 
-    dni: Mapped[str] = mapped_column(primary_key=True)
-    nombre: Mapped[str] = mapped_column(nullable=False)
-    email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    bicis: List = []
+    dni: Mapped[str] = mapped_column(String, primary_key=True)
+    nombre: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    bicis: Mapped[list[Bici]] = relationship("Bici", back_populates="usuario")
 
     def __init__(self, dni: str, nombre: str = "", email: str = "") -> None:
         """
@@ -30,32 +32,24 @@ class Usuario(Base):
         self.dni = dni
         self.nombre = nombre
         self.email = email
-        self.bicis = []
-        # Cargar bicis desde la BD
-        with bd.crear_sesion() as sesion:
-            bicis_orm = sesion.query(BiciORM).filter_by(dni_usuario=dni).all()
-            self.bicis = [bici.toJSON() for bici in bicis_orm]
 
     @classmethod
     def obtener_usuario(cls, dni: str) -> "Usuario":
         """
-        Devuelve la instancia del Usuario con ese DNI si existe,
-        sino crea una nueva.
+        Devuelve la instancia del Usuario con ese DNI si existe
 
         Args:
             dni (str): DNI del usuario
         Returns:
             Usuario: El usuario
+
+        Raises:
+            UsuarioError: Si no existe un Usuario con ese DNI en la base de datos
         """
         with bd.crear_sesion() as sesion:
             usuario_orm = sesion.query(cls).filter_by(dni=dni).first()
             if usuario_orm:
-                usuario = cls(
-                    dni=usuario_orm.dni,
-                    nombre=usuario_orm.nombre,
-                    email=usuario_orm.email,
-                )
-                return usuario
+                return usuario_orm
             else:
                 raise UsuarioError("DNI no encontrado")
 
